@@ -18,6 +18,7 @@
   G.defineBlock('d_build', { color: '#ff9f1c', pattern: 'brick' });
   G.defineBlock('d_void', { color: '#0b0820', pattern: 'grid', accent: '#22e4ff', emissive: true, noise: 0.02 });
   G.defineBlock('d_plat', { color: '#3a3060', pattern: 'tile', noise: 0.05 });
+  G.defineBlock('d_foam', { color: '#2a2340', pattern: 'checker', accent: '#3a3058', noise: 0.05 });
 
   const C = { mag: '#ff2bd6', cyan: '#22e4ff', yel: '#ffd23f', vio: '#8b5cf6', dark: '#140f26' };
 
@@ -348,6 +349,7 @@
     title: 'Estudio Glitch',
     endTitle: '¡Expo abierta!',
     endDelay: 3600,
+    greetKicker: 'Estudio Digital · Diseño e Industria Digital',
     learn: ['Teoría del color: el color comunica emociones.', 'Contraste y legibilidad: diseñar para que todos lean.', 'Diseño web: jerarquía y llamado a la acción.', 'Animación: anticipación y fotogramas clave.', 'Diseño de niveles: construir, probar e iterar.'],
     career: 'Así se trabaja en Diseño e Industria Digital: se comunica con imagen, se diseñan experiencias y se construyen mundos interactivos.',
     build() {
@@ -434,7 +436,7 @@
               palPeds.forEach((pp) => G.unInteract(pp));
               ped.userData.top.material.color.set('#3ddc84');
               G.toast('🎨 ¡Esa paleta transmite energía! Ahora elige el color del título.', 'good');
-              G.setObjective('Elige el color del <b>título</b> del afiche', 'Debe leerse bien sobre el fondo: piensa en el contraste.');
+              G.setObjective(G.t('{n}, elige el color del <b>título</b> del afiche'), 'Debe leerse bien sobre el fondo: piensa en el contraste.');
               showBuckets();
             } else G.mistake(`🎨 <b>${p.name}</b>: ${p.why}`);
           },
@@ -500,7 +502,7 @@
         const cfg = G.interact(sl, {
           label: `Colocar en el espacio ${i + 1}`,
           onUse() {
-            if (!carry) return G.toast('Primero toma un bloque de la web (están repartidos por la sala).');
+            if (!carry) return G.toast(G.t('{n}, primero toma un bloque de la web (están repartidos por la sala).'));
             const m = carry;
             if (MODULES.indexOf(m) === i) {
               carry = null;
@@ -511,7 +513,7 @@
               placed++;
               G.sfx.pick();
               G.burst(new V3(6.5, sl.position.y, -14.5), [C.cyan, C.mag, '#ffffff'], 16, 2);
-              G.setObjective(`Arma la página de la Expo <b>(${placed}/4)</b>`, 'Toma un bloque y colócalo en el espacio que le corresponde.');
+              G.setObjective(G.t(`{n}, arma la página de la Expo <b>(${placed}/4)</b>`), 'Toma un bloque y colócalo en el espacio que le corresponde.');
               if (placed === 4) {
                 browser.userData.redraw(true);
                 G.toast('🌐 ¡Web publicada! Orden claro = mejor experiencia de usuario (UX).', 'good');
@@ -563,7 +565,7 @@
             sc.remove(g);
             G.sfx.pick();
             G.addItem({ id: 'mod_' + m.id, icon: m.icon, name: m.name });
-            G.toast(`Llevas: ${m.icon} <b>${m.name}</b>. Ahora apunta al espacio correcto de la pantalla.`);
+            G.toast(G.t(`{n}, llevas ${m.icon} <b>${m.name}</b>. Ahora apunta al espacio correcto de la pantalla.`));
           },
         });
       });
@@ -620,7 +622,7 @@
               ped.userData.top.material.color.set('#3ddc84');
               framesPlaced++;
               G.sfx.pick();
-              G.setObjective(`Ordena los fotogramas del salto <b>(${framesPlaced}/4)</b>`, 'Toma una lámina y ponla en su lugar de la línea de tiempo.');
+              G.setObjective(G.t(`{n}, ordena los fotogramas del salto <b>(${framesPlaced}/4)</b>`), 'Toma una lámina y ponla en su lugar de la línea de tiempo.');
               if (framesPlaced === 4) {
                 animReady = true;
                 playCfg.enabled = true;
@@ -796,7 +798,7 @@
             built++;
             G.sfx.pick();
             G.burst(new V3(gx + 0.5, 1, z + 0.5), ['#ff9f1c', '#ffffff'], 10, 2);
-            G.setObjective(`Construye el puente <b>(${built}/5)</b> y luego haz el <b>playtest</b>`, 'Apunta a los bloques fantasma. Cuando esté listo, activa la palanca ▶ PROBAR NIVEL.');
+            G.setObjective(G.t(`{n}, construye el puente <b>(${built}/5)</b> y luego haz el <b>playtest</b>`), 'Apunta a los bloques fantasma. Cuando esté listo, activa la palanca ▶ PROBAR NIVEL.');
           },
         });
       }
@@ -830,8 +832,8 @@
                   dispCfg.disabledLabel = 'Dispensador · ya tienes tus bloques';
                   G.closeModal();
                   G.sfx.pick();
-                  G.toast('🟧 5 bloques sólidos. ¡A construir el puente!', 'good');
-                  G.setObjective(`Construye el puente <b>(${built}/5)</b> y luego haz el <b>playtest</b>`, 'Apunta a los bloques fantasma. Cuando esté listo, activa la palanca ▶ PROBAR NIVEL.');
+                  G.toast(G.t('🟧 {n}, tienes 5 bloques sólidos. ¡A construir el puente!'), 'good');
+                  G.setObjective(G.t(`{n}, construye el puente <b>(${built}/5)</b> y luego haz el <b>playtest</b>`), 'Apunta a los bloques fantasma. Cuando esté listo, activa la palanca ▶ PROBAR NIVEL.');
                 } else {
                   btn.disabled = true;
                   btn.classList.add('wrong');
@@ -910,6 +912,183 @@
         G.banner('Estudio Glitch', '¡NIVEL APROBADO · EXPO ABIERTA!', 3200);
         G.stageDone();
       }
+      /* ===== ZONAS PARA EXPLORAR ===== */
+      const R5 = Object.assign({}, R, { h: 5 });
+      // --- Taller de Ilustración (al este de la sala web) ---
+      w.room(16, -13, 26, -1, R5);
+      w.carve(16, 1, -4, 16, 3, -3);
+      G.wallPlace(G.sign('TALLER DE ILUSTRACIÓN ➜', { w: 2.6, h: 0.45, bg: C.dark, fg: C.cyan, borderColor: C.mag }), 'E', 16, -3, 4.45);
+      [19.5, 23].forEach((x) => {
+        const dk = new THREE.Group();
+        dk.position.set(x, 1, -9);
+        const top = G.box(1.6, 0.08, 1.1, '#e9e4f7', 0, 0.85, 0, dk);
+        top.rotation.x = -0.25;
+        G.box(1.3, 0.02, 0.8, '#ffffff', 0, 0.9, 0.02, dk).rotation.x = -0.25;
+        [[-0.7, -0.45], [0.7, -0.45], [-0.7, 0.45], [0.7, 0.45]].forEach(([a, b]) => G.box(0.07, 0.8, 0.07, '#5a4f80', a, 0.4, b, dk));
+        G.box(0.12, 0.12, 0.12, C.mag, 0.5, 1.0, -0.2, dk);
+        G.box(0.12, 0.12, 0.12, C.cyan, 0.32, 1.0, -0.2, dk);
+        sc.add(dk);
+        G.collider(x - 0.8, 1.7, -9.55, x + 0.8, 2, -8.45);
+      });
+      G.placeSecret('boceto', 23, 1.2, -9, { size: 0.34, label: 'Recoger el boceto' });
+      G.npc({
+        name: 'Profe Diego', role: 'Docente de Diseño', avatar: '🧑‍🎨', x: 21, z: -4.6, rotY: -Math.PI / 2, tagBg: 'rgba(255,43,214,.92)',
+        look: { skin: '#e0ac8a', shirt: '#22e4ff', pants: '#1d1830', hair: '#2a1a10', cap: '#ff2bd6' },
+        lines: [
+          '¡Hola, {n}! Bienvenido/a al Taller de Ilustración. Soy el profe Diego. A ver si sabes esta:',
+          '{n}, el mejor consejo que te puedo dar: dibuja todos los días, aunque sea un garabato.',
+          'Un buen portafolio vale más que mil palabras, {n}. Acá en INACAP lo armas desde el primer semestre.',
+          'Psst, {n}… en la sala de animación hay una pared con un glitch extraño.',
+        ],
+        quiz: {
+          q: 'En diseño digital, ¿qué significa «UX»?',
+          answer: 'UX significa <b>Experiencia de Usuario</b>: cómo se siente una persona al usar lo que diseñas.',
+          opts: [
+            { t: 'Experiencia de Usuario', icon: '🙂', ok: true, why: 'UX = User eXperience: cómo vive una persona lo que diseñas.' },
+            { t: 'Ultra eXtremo', icon: '⚡' },
+            { t: 'Unidad de eXportación', icon: '📦' },
+          ],
+        },
+      });
+      G.poster('afiche8', 'N', -13, 21, 3.1, 1.8);
+      G.poster('afiche10', 'E', 26, -7, 3.1, 1.8);
+      G.wallPlace(G.brandSign('Taller de Ilustración · Diseño', 4.2, 0.7), 'S', -1, 21, 4.6);
+
+      // --- Estudio de Sonido (al oeste de la sala de animación) ---
+      w.room(-12, -31, -2, -17, R5);
+      w.carve(-2, 1, -29, -2, 3, -28);
+      w.fill(-12, 1, -30, -12, 5, -18, 'd_foam');
+      w.fill(-11, 1, -31, -3, 5, -31, 'd_foam');
+      G.wallPlace(G.sign('ESTUDIO DE SONIDO ➜', { w: 2.4, h: 0.45, bg: C.dark, fg: C.yel, borderColor: C.yel }), 'W', -2, -28, 4.45);
+      const mix = new THREE.Group();
+      mix.position.set(-7, 1, -22);
+      G.box(2.6, 0.9, 1.1, '#241d3d', 0, 0.45, 0, mix);
+      const pads = ['#ff2bd6', '#22e4ff', '#ffd23f', '#3ddc84', '#ff6b35', '#8b5cf6'];
+      for (let i = 0; i < 12; i++) {
+        const b = G.box(0.14, 0.05, 0.14, pads[i % 6], -1.05 + (i % 6) * 0.42, 0.93, i < 6 ? -0.2 : 0.2, mix);
+        b.material = new THREE.MeshBasicMaterial({ color: pads[i % 6] });
+      }
+      sc.add(mix);
+      G.collider(-8.3, 1, -22.55, -5.7, 1.95, -21.45);
+      const wave = canvasPlane(3, 1.1, 90, (ctx, cw, ch, ph = 0) => {
+        ctx.fillStyle = '#0b0820';
+        ctx.fillRect(0, 0, cw, ch);
+        ctx.strokeStyle = C.cyan;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        for (let x = 0; x < cw; x += 3) {
+          const y = ch / 2 + Math.sin(x * 0.05 + ph) * Math.sin(x * 0.013 + ph * 0.3) * ch * 0.35;
+          x ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        }
+        ctx.stroke();
+      });
+      wave.position.set(-7, 3.2, -29.97);
+      sc.add(wave);
+      let wph = 0;
+      G.tick((dt) => {
+        if (!wave.parent) return false;
+        wph += dt * 3;
+        wave.userData.redraw(wph);
+      });
+      [-9.4, -4.6].forEach((x) => {
+        const sp = new THREE.Group();
+        sp.position.set(x, 1, -29.6);
+        G.box(0.8, 1.6, 0.7, '#1a1530', 0, 0.8, 0, sp);
+        G.box(0.5, 0.5, 0.02, '#3a3058', 0, 1.1, 0.36, sp);
+        G.box(0.3, 0.3, 0.02, '#3a3058', 0, 0.45, 0.36, sp);
+        sc.add(sp);
+        G.collider(x - 0.4, 1, -29.95, x + 0.4, 2.6, -29.25);
+      });
+      // repisa de cintas
+      sc.add(G.box(0.5, 0.08, 1.8, '#8b6b4a', -10.75, 2.2, -25));
+      ['#ff2bd6', '#22e4ff', '#ffd23f'].forEach((c, i) => sc.add(G.box(0.3, 0.2, 0.08, c, -10.8, 2.36, -25.6 + i * 0.25)));
+      G.placeSecret('cassette', -10.75, 2.55, -24.5, {
+        size: 0.34,
+        label: 'Escuchar el cassette',
+        onUse: () => [523, 659, 784, 659, 880, 784, 1046, 1318].forEach((f, i) => G.sfx.tone(f, 0.13, 'square', 0.035, 0, i * 0.14)),
+      });
+      G.npc({
+        name: 'Sofi', role: 'Diseñadora de sonido', avatar: '🎧', x: -5, z: -26.5, rotY: Math.PI / 2, tagBg: 'rgba(255,210,63,.95)',
+        look: { skin: '#c98d6b', shirt: '#8b5cf6', pants: '#1d1830', hair: '#7a4a1e' },
+        lines: [
+          '¡Hey, {n}! Estoy grabando efectos para el juego de la Expo. Pregunta de animación:',
+          '{n}, ¿sabías que muchos sonidos de juegos se graban con objetos de la casa? ¡Hasta un apio puede sonar a hueso!',
+          'Sin sonido un juego se siente vacío, {n}. Prueba quitarle el volumen a tu juego favorito.',
+          'Por ahí dejé un cassette con el soundtrack… si lo encuentras, ¡dale play, {n}!',
+        ],
+        quiz: {
+          q: '¿Cuántos fotogramas por segundo usa normalmente el cine?',
+          answer: 'El cine usa normalmente <b>24 fotogramas por segundo</b>.',
+          opts: [
+            { t: '5 por segundo', icon: '🐢' },
+            { t: '24 por segundo', icon: '🎬', ok: true, why: 'El cine usa 24 fps; muchos videojuegos usan 30 o 60.' },
+            { t: '500 por segundo', icon: '🚀' },
+          ],
+        },
+      });
+      G.poster('afiche9', 'W', -12, -20, 3.1, 1.8);
+      G.wallPlace(G.brandSign('Estudio de Sonido · Diseño', 4.2, 0.7), 'S', -17, -7, 4.6);
+
+      // --- Arcade secreto (tras la pared con glitch de la sala de animación) ---
+      w.room(16, -31, 24, -19, R5);
+      G.secretWall('arcade', G.doorCells(16, 1, -30, 16, 3, -29), 15.9, 2.3, -29, Math.PI / 2, C.vio);
+      const neon = G.sign('ARCADE ★ SECRETO', { w: 3.4, h: 0.6, bg: '#0b0820', fg: C.mag, borderColor: C.cyan });
+      G.wallPlace(neon, 'S', -19, 20, 4.3);
+      const cab = new THREE.Group();
+      cab.position.set(21, 1, -21);
+      cab.rotation.y = Math.PI;
+      G.box(1.1, 2.1, 0.9, '#2d2550', 0, 1.05, 0, cab);
+      G.box(1.12, 0.3, 0.92, C.mag, 0, 2.0, 0, cab);
+      G.box(1.0, 0.12, 0.5, '#1d1830', 0, 1.05, 0.55, cab);
+      G.box(0.1, 0.18, 0.1, '#ff4d4d', -0.2, 1.17, 0.6, cab);
+      G.box(0.1, 0.1, 0.1, C.yel, 0.15, 1.15, 0.6, cab);
+      G.box(0.1, 0.1, 0.1, C.cyan, 0.32, 1.15, 0.6, cab);
+      const scr = canvasPlane(0.85, 0.65, 160, (ctx, cw, ch, t = 0) => {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, cw, ch);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(cw / 2 - 2, 0, 4, ch);
+        const bx = cw / 2 + Math.sin(t * 2.2) * cw * 0.4,
+          by = ch / 2 + Math.cos(t * 3.1) * ch * 0.35;
+        ctx.fillStyle = C.yel;
+        ctx.fillRect(bx - 6, by - 6, 12, 12);
+        ctx.fillStyle = C.cyan;
+        ctx.fillRect(10, by - 20, 8, 40);
+        ctx.fillRect(cw - 18, ch / 2 + Math.sin(t * 2) * ch * 0.3 - 20, 8, 40);
+      });
+      scr.position.set(0, 1.6, 0.46);
+      cab.add(scr);
+      cab.add(hitbox(1.2, 2.2, 1.2, 1.1));
+      sc.add(cab);
+      G.collider(20.45, 1, -21.45, 21.55, 3.1, -20.55);
+      let st = 0;
+      G.tick((dt) => {
+        if (!scr.parent) return false;
+        st += dt;
+        scr.userData.redraw(st);
+      });
+      G.interact(cab, {
+        label: 'Jugar en la máquina arcade',
+        onUse() {
+          const pts = 500 + Math.floor(Math.random() * 40) * 50;
+          [392, 523, 659, 784].forEach((f, i) => G.sfx.tone(f, 0.1, 'square', 0.04, 0, i * 0.08));
+          G.toast(G.t(`🕹️ ¡<b>{n}</b> hizo <b>${pts.toLocaleString('es-CL')}</b> puntos en «Tenis de dos»! Uno de los primeros videojuegos (1958) era justamente un tenis.`), 'gold', 5200);
+        },
+      });
+      G.poster('afiche4', 'E', 24, -25, 3.1, 1.8);
+      G.poster('afiche3', 'W', 16, -22.5, 3.1, 1.6);
+
+      // --- secretos sueltos ---
+      G.placeSecret('pixel', 15.4, 1.35, -14.6, { size: 0.34, label: 'Tomar el píxel dorado' });
+      G.placeSecret('glitchy', 15.2, 1, -33.6, { model: G.voxGlitchy(), label: 'Saludar a la criatura', hy: 0.35 });
+      G.interact(tester, {
+        label: 'Hablar con el tester',
+        onUse() {
+          G.sfx.click();
+          G.toast(G.t(G.pick(['🧢 <b>Tester:</b> «¡{n}, construye el puente y yo lo pruebo! Si me caigo… es un bug 🐞»', '🧢 <b>Tester:</b> «Probar un nivel es parte del diseño, {n}. ¡Nadie lo hace perfecto a la primera!»'])), 'info', 4200);
+        },
+      });
+
       /* --- marca INACAP: afiches, carteles y fichas --- */
       G.poster('afiche3', 'W', 0, 6, 3.5, 2.2);
       G.wallPlace(G.brandSign('Estudio Digital · Diseño e Industria Digital', 5.2, 0.75), 'S', 12, 7, 4.35);
@@ -928,14 +1107,14 @@
       return {
         spawn: { x: 7.5, y: 1, z: 10.5, yaw: 0 },
         intro: {
-          title: '🎨 Estudio Glitch',
-          text: '<p>Un <b>glitch</b> borró los colores y archivos del <b>Estudio Digital</b> justo antes de la Expo.</p><p>Eres parte del equipo creativo. Restaura el estudio en 4 desafíos:</p><ol class="steps"><li>Color e identidad: restaura el afiche</li><li>Diseño web: arma la página de la Expo</li><li>Animación: haz saltar al personaje</li><li>Videojuegos: construye y prueba un nivel</li></ol>',
+          title: '🎨 ¡Hola, {n}! Bienvenido/a al Estudio Glitch',
+          text: '<p><b>{n}</b>, un <b>glitch</b> borró los colores y archivos del <b>Estudio Digital</b> justo antes de la Expo.</p><p>Eres parte del equipo creativo. Restaura el estudio en 4 desafíos:</p><ol class="steps"><li>Color e identidad: restaura el afiche</li><li>Diseño web: arma la página de la Expo</li><li>Animación: haz saltar al personaje</li><li>Videojuegos: construye y prueba un nivel</li></ol>',
         },
         stages: [
-          { title: 'Color e identidad visual', short: 'Color', points: 20, objective: 'Restaura el afiche: elige la <b>paleta</b> que pide el cliente', sub: 'Lee el BRIEF en la pared derecha: energía y alegría.', skip: () => { G.openCells(door1); G.stageDone(20); } },
-          { title: 'Arma la web de la Expo', short: 'Web', points: 25, objective: 'Arma la página de la Expo <b>(0/4)</b>', sub: 'Toma un bloque y colócalo en el espacio que le corresponde.', skip: () => { G.openCells(door2); G.stageDone(25); } },
-          { title: 'Anima al personaje', short: 'Animación', points: 30, objective: 'Ordena los fotogramas del salto <b>(0/4)</b>', sub: 'Toma una lámina y ponla en su lugar de la línea de tiempo.', skip: () => { G.openCells(door3); G.stageDone(30); } },
-          { title: 'Construye y prueba el nivel', short: 'Nivel', points: 25, objective: 'Consigue bloques en el <b>DISPENSADOR</b> y construye el puente', sub: 'El tester debe poder llegar a la META.', skip: () => { if (!levelDone) { levelDone = true; win(); } } },
+          { title: 'Color e identidad visual', short: 'Color', points: 20, objective: '{n}, restaura el afiche: elige la <b>paleta</b> que pide el cliente', sub: 'Lee el BRIEF en la pared derecha: energía y alegría.', skip: () => { G.openCells(door1); G.stageDone(20); } },
+          { title: 'Arma la web de la Expo', short: 'Web', points: 25, objective: '{n}, arma la página de la Expo <b>(0/4)</b>', sub: 'Toma un bloque y colócalo en el espacio que le corresponde. Tip: hay un Taller de Ilustración a la derecha →', skip: () => { G.openCells(door2); G.stageDone(25); } },
+          { title: 'Anima al personaje', short: 'Animación', points: 30, objective: '{n}, ordena los fotogramas del salto <b>(0/4)</b>', sub: 'Toma una lámina y ponla en su lugar de la línea de tiempo. Tip: visita el Estudio de Sonido ←', skip: () => { G.openCells(door3); G.stageDone(30); } },
+          { title: 'Construye y prueba el nivel', short: 'Nivel', points: 25, objective: '{n}, consigue bloques en el <b>DISPENSADOR</b> y construye el puente', sub: 'El tester debe poder llegar a la META.', skip: () => { if (!levelDone) { levelDone = true; win(); } } },
         ],
       };
     },

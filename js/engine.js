@@ -163,6 +163,19 @@
           ctx.fillRect(x, y, 1, 1);
         }
     },
+    crack(ctx, s, o, r) {
+      PAT.noise(ctx, s, o, r);
+      ctx.fillStyle = shade(o.color, 0.45);
+      let x = 3 + Math.floor(r() * 4);
+      for (let y = 0; y < s; y++) {
+        ctx.fillRect(x, y, 1, 1);
+        if (r() < 0.45) x += r() < 0.5 ? -1 : 1;
+        x = Math.max(1, Math.min(s - 2, x));
+        if (y === 7) ctx.fillRect(x, y, 5, 1);
+      }
+      ctx.fillRect(10, 2, 1, 3);
+      ctx.fillRect(11, 4, 1, 2);
+    },
     ghost(ctx, s, o) {
       ctx.clearRect(0, 0, s, s);
       ctx.fillStyle = o.color;
@@ -728,8 +741,38 @@
     P.yaw = yaw;
     P.pitch = 0;
     P.respawn = { x, y, z, yaw };
+    P.safe = null;
+  };
+  /* Si por cualquier motivo el jugador queda dentro de un objeto,
+     lo empuja al espacio libre más cercano. */
+  function unstick() {
+    const { x, y, z } = P.pos;
+    for (let r = 0.25; r <= 3; r += 0.25)
+      for (let dy = 0; dy <= 1.01; dy += 0.5)
+        for (let a = 0; a < 16; a++) {
+          const nx = x + Math.cos((a / 16) * Math.PI * 2) * r,
+            nz = z + Math.sin((a / 16) * Math.PI * 2) * r;
+          if (!collides(nx, y + dy, nz)) {
+            P.pos.set(nx, y + dy, nz);
+            P.vel.set(0, 0, 0);
+            return true;
+          }
+        }
+    return false;
+  }
+  G.unstuck = function () {
+    const s = P.safe || G.checkpoint || P.respawn;
+    if (s && !collides(s.x, s.y, s.z)) P.pos.set(s.x, s.y, s.z);
+    else if (!unstick()) {
+      const r = P.respawn;
+      P.pos.set(r.x, r.y, r.z);
+    }
+    P.vel.set(0, 0, 0);
+    P.push.set(0, 0, 0);
+    G.toast('🧭 Listo, te movimos a un lugar seguro.', 'info', 2400);
   };
   function updatePlayer(dt) {
+    if (collides(P.pos.x, P.pos.y, P.pos.z)) unstick();
     let fx = 0,
       fz = 0;
     if (P.stun <= 0) {
@@ -763,11 +806,25 @@
       P.pos.y = ny;
       P.onGround = false;
     } else {
-      if (P.vel.y < 0) {
-        P.onGround = true;
-        P.pos.y = Math.ceil(ny - 0.001) > ny ? Math.floor(P.pos.y + 0.0001) : P.pos.y;
+      // Acercarse a la superficie sin atravesarla (camas, mesas y cualquier
+      // objeto de altura no entera). Antes se "redondeaba" al piso y el
+      // jugador quedaba dentro de la camilla.
+      let free = P.pos.y,
+        hit = ny;
+      for (let i = 0; i < 10; i++) {
+        const mid = (free + hit) / 2;
+        if (collides(P.pos.x, mid, P.pos.z)) hit = mid;
+        else free = mid;
       }
+      P.pos.y = free;
+      if (P.vel.y < 0) P.onGround = true;
       P.vel.y = 0;
+    }
+    // Registro de la última posición segura (para "Desatascarme")
+    P.safeT = (P.safeT || 0) + dt;
+    if (P.onGround && P.safeT > 0.5) {
+      P.safeT = 0;
+      P.safe = { x: P.pos.x, y: P.pos.y, z: P.pos.z };
     }
     if (P.pos.y < (G.voidY == null ? -12 : G.voidY)) {
       if (G.onFall) G.onFall();
@@ -787,11 +844,22 @@
     if (G.state !== 'play') return;
     if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
     if (G.modalOpen) {
-      if (e.code === 'Escape' && G._modalClosable) G.closeModal();
+      if ((e.code === 'Escape' || (e.code === 'KeyC' && G._modalKind === 'hallazgos')) && G._modalClosable) G.closeModal();
       return;
     }
+    if (pauseEl.classList.contains('show')) {
+      if (e.code === 'Enter' || e.code === 'Space') resume();
+      if (e.code === 'KeyC' && G.openHallazgos) {
+        hidePause();
+        G.openHallazgos();
+      }
+      return;
+    }
+    if (e.code === 'Escape' && G.lockFailed) return showPause();
     if (e.code === 'KeyE' || e.code === 'Enter') tryInteract();
     if (e.code === 'KeyM') G.sfx.toggle();
+    if (e.code === 'KeyR') G.unstuck();
+    if (e.code === 'KeyC' && G.openHallazgos) G.openHallazgos();
     if (e.code === 'KeyN' && e.shiftKey) G.skipStage();
   });
   window.addEventListener('keyup', (e) => (keys[e.code] = false));
@@ -810,12 +878,20 @@
       if (p && p.catch) p.catch(() => {});
     } catch (e) {}
   };
+  // El navegador rechaza volver a capturar el mouse justo después de Esc.
+  // Solo pasamos a "modo arrastrar" si falla varias veces seguidas.
+  let lockErrors = 0;
   document.addEventListener('pointerlockerror', () => {
-    G.lockFailed = true;
+    lockErrors++;
+    if (lockErrors >= 3) G.lockFailed = true;
     hidePause();
+    if (!G.lockFailed && G.state === 'play') G.toast('Haz clic en la pantalla para seguir moviendo la cámara.', 'info', 2200);
   });
   document.addEventListener('pointerlockchange', () => {
-    if (isLocked()) hidePause();
+    if (isLocked()) {
+      lockErrors = 0;
+      hidePause();
+    }
     else if (G.state === 'play' && !G.modalOpen && !G.lockFailed) showPause();
   });
   canvas.addEventListener('mousedown', (e) => {
@@ -852,15 +928,31 @@
   function hidePause() {
     pauseEl.classList.remove('show');
   }
-  pauseEl.addEventListener('click', () => {
+  function resume() {
     G.sfx.init();
     hidePause();
     G.requestLock();
+  }
+  G.resume = resume;
+  // Clic en el fondo o en "Continuar" → seguir jugando
+  pauseEl.addEventListener('click', (e) => {
+    if (e.target.closest('button') && e.target.id !== 'pauseGo') return;
+    resume();
   });
   document.getElementById('pauseMenu').addEventListener('click', (e) => {
     e.stopPropagation();
     hidePause();
     G.toMenu();
+  });
+  document.getElementById('pauseStuck').addEventListener('click', (e) => {
+    e.stopPropagation();
+    G.unstuck();
+    resume();
+  });
+  document.getElementById('pauseBook').addEventListener('click', (e) => {
+    e.stopPropagation();
+    hidePause();
+    if (G.openHallazgos) G.openHallazgos();
   });
 
   /* ------------------------------------------------------ hover/interact */
@@ -981,8 +1073,10 @@
     G.modalOpen = true;
     G._modalClosable = o.closable !== false;
     G._modalOnClose = o.onClose;
+    G._modalKind = o.kind || null;
     if (isLocked()) document.exitPointerLock();
     const m = $('modal');
+    m.querySelector('.box').className = 'box' + (o.wide ? ' wide' : '');
     m.querySelector('.m-title').innerHTML = o.title || '';
     m.querySelector('.m-text').innerHTML = o.text || '';
     const opts = m.querySelector('.m-opts');
@@ -1022,6 +1116,17 @@
   G.fmtTime = fmtTime;
   const now = () => performance.now() / 1000;
 
+  /* ---------- personalización con el nombre del jugador ---------- */
+  // Primer nombre "bonito": "ricardo valencia" → "Ricardo"
+  G.firstName = function (s) {
+    const w = String(s || '').trim().split(/\s+/)[0] || '';
+    return w ? w.charAt(0).toUpperCase() + w.slice(1) : '';
+  };
+  G.n = () => (G.run && G.run.first) || 'Jugador/a';
+  // Reemplaza {n} por el nombre del jugador (escapado)
+  G.t = (s) => String(s).replace(/\{n\}/g, escapeHtml(G.n()));
+  G.pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
   G.startChallenge = function (id, name) {
     const ch = G.challenges[id];
     G.sfx.init();
@@ -1030,41 +1135,48 @@
     G.checkpoint = null;
     G.voidY = null;
     G.onFall = null;
+    const first = G.participant ? G.firstName(G.participant.nombre) : G.firstName(name);
+    // El nombre debe existir antes de construir el nivel (textos personalizados)
+    G.run = { id, ch, first };
     const def = ch.build();
-    G.run = { id, ch, name: name || 'Jugador/a', code: G.participant ? G.participant.codigo : null, stages: def.stages, idx: -1, scores: [], stageErr: 0, errors: 0, fichas: [], t0: now(), stageT0: now(), presenter: false, done: false };
+    Object.assign(G.run, { name: name || 'Jugador/a', code: G.participant ? G.participant.codigo : null, stages: def.stages, idx: -1, scores: [], stageErr: 0, errors: 0, fichas: [], found: {}, bonus: [], t0: now(), stageT0: now(), presenter: false, done: false });
     if (G.updateFichas) G.updateFichas();
     G.setPlayer(def.spawn.x, def.spawn.y, def.spawn.z, def.spawn.yaw || 0);
     document.body.dataset.theme = id;
     $('menu').classList.remove('show');
     $('results').classList.remove('show');
     $('hud').classList.add('show');
-    $('hudTitle').innerHTML = `<span class="tag">${ch.tag}</span>${ch.title}`;
+    $('hudTitle').innerHTML = `<span class="hello">👋 Hola, <b>${escapeHtml(G.n())}</b></span><span class="where">estás en <b>${ch.title.toUpperCase()}</b> · ${ch.short}</span>`;
     G.state = 'play';
     G.world.rebuild();
     $('timer').textContent = '0:00';
     $('score').textContent = '0';
     const r = G.run;
+    const go = () => {
+      G.banner(ch.greetKicker || `Te damos la bienvenida a ${ch.title}`, `¡HOLA, ${escapeHtml(G.n()).toUpperCase()}!`, 2400);
+      setTimeout(() => G.run === r && !r.done && G.nextStage(), 2300);
+    };
     if (def.intro) {
       r.paused = true;
       G.modal({
-        title: def.intro.title,
-        text: def.intro.text,
+        title: G.t(def.intro.title),
+        text: G.t(def.intro.text),
         closable: false,
         options: [
           {
-            label: '¡Comenzar misión!',
+            label: G.t('¡Vamos, {n}! Comenzar misión'),
             cls: 'go',
             onPick() {
               r.t0 = now();
               r.paused = false;
               G.closeModal();
-              G.nextStage();
+              go();
             },
           },
         ],
       });
     } else {
-      G.nextStage();
+      go();
       G.requestLock();
     }
   };
@@ -1080,8 +1192,8 @@
     r.stageT0 = now();
     const st = r.stages[r.idx];
     renderStages();
-    G.banner(`Etapa ${r.idx + 1} de ${r.stages.length}`, st.title);
-    G.setObjective(st.objective, st.sub);
+    G.banner(`${escapeHtml(G.n())} · Etapa ${r.idx + 1} de ${r.stages.length}`, st.title);
+    G.setObjective(G.t(st.objective), G.t(st.sub || ''));
     if (st.onEnter) st.onEnter();
   };
   G.stageScore = function () {
@@ -1096,7 +1208,8 @@
     const pts = override != null ? override : G.stageScore();
     r.scores.push({ title: st.title, pts, max: st.points, errors: r.stageErr, time: now() - r.stageT0 });
     G.sfx.good();
-    G.toast(`<b>¡Etapa completada!</b> +${pts} pts`, 'good');
+    const praise = G.pick(['¡Muy bien, {n}!', '¡Excelente, {n}!', '¡Así se hace, {n}!', '¡Bien hecho, {n}!']);
+    G.toast(`<b>${G.t(praise)}</b> Etapa completada · +${pts} pts`, 'good');
     G.flash('rgba(80,255,170,.25)');
     renderStages();
     if (r.idx + 1 < r.stages.length) setTimeout(() => G.run === r && !r.done && G.nextStage(), 900);
@@ -1110,11 +1223,12 @@
     }
     G.sfx.bad();
     G.flash('rgba(255,60,60,.28)');
-    G.toast(msg + (penalty ? ' <b class="neg">−5 pts</b>' : ''), 'bad', 4200);
+    const pre = G.pick(['Ojo, {n}: ', '{n}, revisa esto: ', 'Casi, {n}. ', '']);
+    G.toast(G.t(pre) + msg + (penalty ? ' <b class="neg">−5 pts</b>' : ''), 'bad', 4200);
   };
   G.skipStage = function () {
     const r = G.run;
-    if (!r || r.done) return;
+    if (!r || r.done || r.idx < 0) return;
     r.presenter = true;
     G.toast('Modo presentador: etapa saltada (no guarda ranking)', 'info');
     const st = r.stages[r.idx];
@@ -1131,9 +1245,23 @@
         return `<div class="chip ${cls}" title="${s.title}"><b>${i + 1}</b><span>${s.short || s.title}</span></div>`;
       })
       .join('');
-    const total = r.scores.reduce((a, s) => a + s.pts, 0);
-    $('score').textContent = total;
+    G.refreshScore();
   }
+  // Puntaje en vivo: etapas + fichas + secretos/preguntas
+  G.refreshScore = function () {
+    const r = G.run;
+    if (!r || !r.scores) return;
+    const pp = (window.CONFIG && window.CONFIG.puntosPorFicha) || 2;
+    const total = r.scores.reduce((a, s) => a + s.pts, 0) + r.fichas.length * pp + r.bonus.reduce((a, b) => a + b.pts, 0);
+    $('score').textContent = total;
+  };
+  // Suma un bonus (secreto encontrado, pregunta respondida…)
+  G.addBonus = function (kind, label, pts) {
+    const r = G.run;
+    if (!r || r.done) return;
+    r.bonus.push({ kind, label, pts });
+    G.refreshScore();
+  };
 
   G.finish = function () {
     const r = G.run;
@@ -1144,8 +1272,9 @@
     const bonusTime = time < 12 * 60 ? 10 : 0;
     const bonusClean = r.errors === 0 ? 5 : 0;
     const bonusFichas = r.fichas.length * ((window.CONFIG && window.CONFIG.puntosPorFicha) || 2);
-    const total = base + bonusTime + bonusClean + bonusFichas;
-    r.result = { base, bonusTime, bonusClean, bonusFichas, total, time };
+    const bonusExtra = r.bonus.reduce((a, b) => a + b.pts, 0); // secretos + preguntas de los profes
+    const total = base + bonusTime + bonusClean + bonusFichas + bonusExtra;
+    r.result = { base, bonusTime, bonusClean, bonusFichas, bonusExtra, total, time };
     G.sfx.win();
     setTimeout(() => {
       if (G.run !== r) return;
@@ -1185,6 +1314,7 @@
     const el = $('results');
     el.querySelector('.r-kicker').textContent = ch.tag + ' · Misión completada';
     el.querySelector('.r-title').textContent = ch.endTitle;
+    el.querySelector('.r-hello').innerHTML = G.t(G.pick(['¡Gran trabajo, {n}! 🎉', '¡Lo lograste, {n}! 🎉', '¡Felicitaciones, {n}! 🎉']));
     el.querySelector('.r-total').innerHTML = `${res.total}<small>pts</small>`;
     el.querySelector('.r-meta').innerHTML = `${escapeHtml(r.name)}${r.code ? ` · <code>${r.code}</code>` : ''} · Tiempo ${fmtTime(res.time)}${pos ? ` · Puesto #${pos} en este computador` : ' · Modo presentador'}`;
     el.querySelector('.r-break').innerHTML =
@@ -1193,7 +1323,9 @@
         .join('') +
       `<tr class="bonus"><td>Bonus tiempo (bajo 12:00)</td><td></td><td><b>+${res.bonusTime}</b></td></tr>` +
       `<tr class="bonus"><td>Bonus misión sin errores</td><td></td><td><b>+${res.bonusClean}</b></td></tr>` +
-      `<tr class="bonus brand"><td>Fichas INACAP (${r.fichas.length}/${G.fichaTotal || 0})</td><td></td><td><b>+${res.bonusFichas}</b></td></tr>`;
+      `<tr class="bonus brand"><td>Fichas INACAP (${r.fichas.length}/${G.fichaTotal || 0})</td><td></td><td><b>+${res.bonusFichas}</b></td></tr>` +
+      bonusRow(r, 'secreto', `Secretos encontrados (${r.bonus.filter((b) => b.kind === 'secreto').length}/${G.secretTotal || 0})`) +
+      bonusRow(r, 'pregunta', `Preguntas de los profes`);
     el.querySelector('.r-learn').innerHTML = `<h4>Lo que acabas de practicar</h4><ul>${ch.learn.map((l) => `<li>${l}</li>`).join('')}</ul><p class="r-career">${ch.career}</p>` +
       (r.fichas.length ? `<h4 style="margin-top:14px">Tus Fichas INACAP</h4><ul class="r-fichas">${r.fichas.map((f) => `<li>“${escapeHtml(f)}”</li>`).join('')}</ul>` : `<p class="dim" style="margin-top:12px">Tip: hay ${G.fichaTotal || 3} Fichas INACAP escondidas en el nivel (+${(window.CONFIG && window.CONFIG.puntosPorFicha) || 2} pts c/u).</p>`);
     el.querySelector('.r-rank').innerHTML =
@@ -1209,8 +1341,15 @@
     ob.onclick = () => G.startChallenge(other, r.name);
     el.querySelector('.r-again').onclick = () => G.startChallenge(r.id, r.name);
     el.querySelector('.r-menu').onclick = () => G.toMenu();
+    el.querySelector('.r-book').onclick = () => G.openHallazgos && G.openHallazgos();
+    if (G.saveAlbum) G.saveAlbum(r);
     el.classList.add('show');
     G.confettiDom();
+  }
+  function bonusRow(r, kind, label) {
+    const pts = r.bonus.filter((b) => b.kind === kind).reduce((a, b) => a + b.pts, 0);
+    if (kind === 'pregunta' && !r.bonus.some((b) => b.kind === kind)) return '';
+    return `<tr class="bonus gold"><td>${label}</td><td></td><td><b>+${pts}</b></td></tr>`;
   }
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -1232,6 +1371,7 @@
   };
 
   G.toMenu = function () {
+    if (G.run && G.run.found && !G.run.done && G.saveAlbum) G.saveAlbum(G.run); // guarda lo encontrado aunque salga a mitad
     G.state = 'menu';
     G.run = null;
     G.closeModalSilently();

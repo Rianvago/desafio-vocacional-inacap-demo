@@ -134,14 +134,16 @@
     r.fichas.push(text);
     G.updateFichas();
     G.toast(
-      `<div class="ficha-toast"><img src="${A.ficha}" alt=""><div><b>Ficha INACAP ${r.fichas.length}/${G.fichaTotal}</b> · +${C.puntosPorFicha || 2} pts bonus<br><span>“${G.escapeHtml(text)}”</span></div></div>`,
+      `<div class="ficha-toast"><img src="${A.ficha}" alt=""><div><b>${G.t('¡{n}, encontraste una Ficha INACAP!')} ${r.fichas.length}/${G.fichaTotal}</b> · +${C.puntosPorFicha || 2} pts bonus<br><span>“${G.escapeHtml(text)}”</span></div></div>`,
       'brand',
       5600
     );
   }
   G.updateFichas = function () {
     const el = G.$('fichas');
-    if (el && G.run) el.textContent = `${G.run.fichas.length}/${G.fichaTotal}`;
+    if (el && G.run && G.run.fichas) el.textContent = `${G.run.fichas.length}/${G.fichaTotal}`;
+    if (G.refreshScore) G.refreshScore();
+    if (G.updateSecrets) G.updateSecrets();
   };
 
   /* ---------------- Inscripción simulada ---------------- */
@@ -266,10 +268,14 @@
       e.preventDefault();
       const f = new FormData(e.target);
       const v = (k) => String(f.get(k) || '').trim();
+      // "ignacio pérez" → "Ignacio Pérez"
+      const cap = (t) => t.toLowerCase().replace(/(^|\s)(\S)/g, (m, sp, ch) => sp + ch.toUpperCase());
       const err = $('regErr');
       if (!v('nombre') || !v('apellido')) return (err.textContent = 'Completa tu nombre y apellido.');
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('correo'))) return (err.textContent = 'Revisa tu correo electrónico.');
       if (!/^\+?[\d\s]{8,15}$/.test(v('telefono'))) return (err.textContent = 'Revisa tu número de celular.');
+      const edad = parseInt(v('edad'), 10);
+      if (!(edad >= 10 && edad <= 99)) return (err.textContent = 'Escribe tu edad (solo números).');
       if (!v('establecimiento') || !v('curso')) return (err.textContent = 'Completa tu establecimiento y curso.');
       if (!f.get('consentimiento')) return (err.textContent = 'Debes aceptar el consentimiento para participar.');
       const regs = loadRegs();
@@ -278,11 +284,12 @@
       regs.push({
         codigo,
         pinHash: hashPin(codigo, pin),
-        nombre: v('nombre'),
-        apellido: v('apellido'),
+        nombre: cap(v('nombre')),
+        apellido: cap(v('apellido')),
         rut: v('rut'),
         telefono: v('telefono'),
         correo: v('correo'),
+        edad,
         tipo: v('tipo'),
         establecimiento: v('establecimiento'),
         curso: v('curso'),
@@ -293,7 +300,7 @@
       });
       saveRegs(regs);
       G.sfx.good();
-      $('pdName').textContent = v('nombre');
+      $('pdName').textContent = cap(v('nombre'));
       $('pdCode').textContent = codigo;
       $('pdPin').textContent = pin;
       $('pdMail').textContent = v('correo');

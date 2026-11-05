@@ -56,6 +56,15 @@
     G.scene.add(bb);
     G.scene.add(G.box(0.3, 6.1, 0.3, '#3d3d3d', -2.6, 4.05, -1.5));
     G.scene.add(G.box(0.3, 6.1, 0.3, '#3d3d3d', 3.6, 4.05, -1.5));
+    // afiches INACAP en el campus
+    G.poster('afiche6', 'E', -17, -4.5, 3.4, 2.4);
+    G.poster('afiche8', 'W', 17, -4.5, 3.6, 2.4);
+    [['afiche10', -5], ['afiche5', 6]].forEach(([k, x]) => {
+      G.poster(k, 'N', 11, x, 2.6, 1.5);
+      G.scene.add(G.box(1.7, 2.2, 0.12, '#3d3d3d', x, 2.6, 11.88));
+      G.scene.add(G.box(0.12, 1.6, 0.12, '#3d3d3d', x - 0.6, 0.8 + 1, 11.88));
+      G.scene.add(G.box(0.12, 1.6, 0.12, '#3d3d3d', x + 0.6, 0.8 + 1, 11.88));
+    });
     // estudiantes caminando
     const people = [
       { x: 0.3, z: 16, sp: 1.2, c: '#e3242b' },
@@ -96,7 +105,16 @@
   } catch (e) {}
   document.querySelectorAll('[data-ch]').forEach((b) =>
     b.addEventListener('click', () => {
-      const name = nameEl.value.trim() || 'Jugador/a';
+      const name = nameEl.value.trim();
+      if (!G.participant && name.length < 2) {
+        G.sfx.init();
+        G.sfx.bad();
+        G.toast('✍️ Escribe tu nombre primero: el juego te va a hablar por tu nombre.', 'bad', 3200);
+        nameEl.focus();
+        nameEl.classList.add('need');
+        setTimeout(() => nameEl.classList.remove('need'), 1200);
+        return;
+      }
       try {
         localStorage.setItem('demoVocacional_name', nameEl.value.trim());
       } catch (e) {}
@@ -104,6 +122,7 @@
       G.startChallenge(b.dataset.ch, name);
     })
   );
+  G.$('btnAlbum').addEventListener('click', () => G.openAlbum());
   G.loadImages().then(() => {
     G.buildMenuScene();
     G.initWelcome();

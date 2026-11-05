@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Desafío Vocacional INACAP · Demo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%23CC0000%22/%3E%3Crect x=%224%22 y=%224%22 width=%223%22 height=%228%22 fill=%22%23fff%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -156,6 +157,56 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
 .r-rank li i{font-style:normal;color:var(--dim);font-size:.8rem}
 .r-rank li.me{color:var(--yel);font-weight:800}
 .r-actions{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap}
+/* saludo central arriba */
+.hud-center{position:fixed;left:50%;top:14px;transform:translateX(-50%);pointer-events:none;z-index:2}
+#hudTitle{background:var(--panel);border:2px solid var(--accent);border-radius:14px;padding:.55em 1.1em;flex-direction:column;gap:.1em;text-align:center;box-shadow:0 6px 0 -2px rgba(0,0,0,.35)}
+#hudTitle .hello{font:800 1.25rem var(--ui);white-space:nowrap}
+#hudTitle .hello b{color:var(--accent2,#fff)}
+#hudTitle .where{font:600 .78rem var(--ui);color:#cfd7e4;letter-spacing:.04em;white-space:nowrap}
+#hudTitle .where b{color:#fff}
+/* pausa */
+#pause .box{width:min(460px,100%);text-align:center;cursor:default}
+#pause h2{margin-bottom:.4em}
+#pause .p-sub{color:#cfd7e4;margin:0 0 1.2em;line-height:1.5}
+.btn.go{display:block;width:100%;box-sizing:border-box;background:#22c55e;border-color:#22c55e;color:#06210f;font-size:1.35rem;padding:.9em 1em;box-shadow:0 6px 0 #15803d;margin-top:0}
+.btn.go:hover{background:#2ee06f;border-color:#2ee06f}
+.p-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.p-row .btn{margin-top:0;font-size:.85rem}
+#pause .p-menu{all:unset;cursor:pointer;display:inline-block;margin-top:16px;color:var(--dim);font-size:.82rem;text-decoration:underline}
+/* modal sobre resultados + modal ancho */
+#modal{z-index:9}
+#modal .box.wide{width:min(900px,100%)}
+.m-opts.cards4{display:grid;grid-template-columns:repeat(2,1fr)}
+.m-opts.cards4 .m-opt{flex-direction:column;text-align:center;justify-content:center;padding:16px 10px}
+/* hallazgos */
+.hz-sum{display:flex;gap:8px;flex-wrap:wrap;margin:.2em 0 1em}
+.hz-sum span{background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:99px;padding:.35em .8em;font-weight:700;font-size:.85rem}
+.hz-sec{margin:14px 0 6px;font:800 .75rem var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.hz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.hz-item{background:rgba(255,255,255,.05);border:2px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:4px;min-height:92px}
+.hz-item .ic{font-size:1.7rem;line-height:1}
+.hz-item b{font-size:.9rem}
+.hz-item small{color:#b9c3d3;font-size:.76rem;line-height:1.35}
+.hz-item.got{border-color:#ffd23f;background:rgba(255,210,63,.08)}
+.hz-item.brand.got{border-color:#CC0000;background:rgba(204,0,0,.12)}
+.hz-item.no{opacity:.55}
+.hz-item.no .ic{filter:grayscale(1) brightness(.4)}
+.hz-pos{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.hz-pos figure{margin:0;border-radius:8px;overflow:hidden;border:2px solid var(--line);position:relative;aspect-ratio:3/4;background:#1b2233}
+.hz-pos figure img{width:100%;height:100%;object-fit:cover;display:block}
+.hz-pos figure.no img{filter:grayscale(1) brightness(.25) blur(2px)}
+.hz-pos figure.no::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;font:800 2rem var(--ui);color:#fff}
+.hz-pos figure.got{border-color:#CC0000}
+.toast.gold{border-color:#ffd23f;background:rgba(40,32,6,.92)}
+.stat.gold b{color:#ffd23f}
+.name input.need{border-color:#ff4d4d;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (max-width:1180px){.hud-center{top:auto;bottom:168px}}
+.r-break tr.gold td{color:#ffd23f}
+.r-hello{font:800 1.15rem var(--ui);color:#fff;margin-top:.45em}
+.npc-say{display:flex;gap:14px;align-items:flex-start}
+.npc-say .av{font-size:2.6rem;line-height:1;flex:none}
+.npc-say p{margin:0 0 .5em}
 #confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden}
 #confetti i{position:absolute;top:-20px;width:10px;height:10px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
@@ -316,9 +367,12 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
           <label>Celular</label><input type="tel" name="telefono" maxlength="15" placeholder="+56 9 1234 5678">
           <label>Correo electrónico</label><input type="email" name="correo" maxlength="60" placeholder="nombre@correo.cl">
           <label>Tipo de establecimiento</label>
-          <select name="tipo"><option>Colegio</option><option>Universidad</option><option>Instituto</option></select>
+          <select name="tipo"><option>Colegio</option><option>Universidad</option><option>Instituto / CFT</option><option>Otro</option></select>
           <label>Nombre del establecimiento</label><input type="text" name="establecimiento" maxlength="60">
-          <label>Curso o nivel</label><input type="text" name="curso" maxlength="30" placeholder="Ej: 4° medio">
+          <div class="row">
+            <div><label>Edad</label><input type="tel" name="edad" maxlength="2" inputmode="numeric" placeholder="Ej: 17"></div>
+            <div><label>Curso o nivel</label><input type="text" name="curso" maxlength="30" placeholder="Ej: 4° medio"></div>
+          </div>
           <label>Desafío que quieres jugar</label>
           <div class="seg">
             <label><input type="radio" name="desafio" value="enfermeria" checked> Enfermería</label>
@@ -360,7 +414,7 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
     <div class="m-brand"><img class="logo-blanco" alt="INACAP"><span>Sede Valparaíso · Demo jugable</span></div>
     <h1>DESAFÍO<br>VOCACIONAL</h1>
     <p class="lead">Explora dos áreas de estudio jugando en un mundo de cubos. Cada misión dura de 10 a 15 minutos y vale <b>100 puntos + bonus</b>.</p>
-    <label class="name">Tu nombre o apodo
+    <label class="name">Tu nombre (así te hablará el juego)
       <input id="playerName" maxlength="18" placeholder="Ej: Cata" autocomplete="off">
     </label>
     <div id="who"></div>
@@ -380,11 +434,13 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
         <span class="c-go">Jugar ▶</span>
       </button>
     </div>
+    <button class="btn" id="btnAlbum" style="margin-top:14px">📒 Mi álbum de hallazgos</button>
     <div class="howto">
       <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> moverse</span>
       <span>🖱️ mirar</span>
       <span><kbd>E</kbd> o clic · interactuar</span>
       <span><kbd>Espacio</kbd> saltar</span>
+      <span><kbd>C</kbd> hallazgos</span>
       <span><kbd>Esc</kbd> pausa</span>
     </div>
     <p class="foot">Demo de concepto · sin conexión a base de datos · el ranking se guarda solo en este computador.<br>Presentador: <b>Shift + N</b> salta la etapa actual (esa partida no entra al ranking).</p>
@@ -395,7 +451,7 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
 <div id="hud">
   <div class="hud-top">
     <div class="hud-left">
-      <div style="display:flex;align-items:center;gap:12px"><img class="logo-blanco hud-brand" alt="INACAP"><div id="hudTitle"></div></div>
+      <div style="display:flex;align-items:center;gap:12px"><img class="logo-blanco hud-brand" alt="INACAP" style="height:22px"></div>
       <div id="stages"></div>
       <div id="objective"><div id="objMain"></div><div id="objSub"></div></div>
     </div>
@@ -403,12 +459,14 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
       <div class="stat"><small>Tiempo</small><b id="timer">0:00</b></div>
       <div class="stat"><small>Puntos</small><b id="score">0</b></div>
       <div class="stat brand"><small>Fichas</small><b id="fichas">0/3</b></div>
+      <div class="stat gold"><small>Secretos</small><b id="secretos">0/5</b></div>
     </div>
   </div>
+  <div class="hud-center"><div id="hudTitle"></div></div>
   <div id="crosshair"></div>
   <div id="prompt"></div>
   <div id="hotbar"></div>
-  <div class="keys-hint"><span><kbd>E</kbd> usar</span><span><kbd>Espacio</kbd> saltar</span><span><kbd>Shift</kbd> correr</span><span><kbd>M</kbd> sonido</span></div>
+  <div class="keys-hint"><span><kbd>E</kbd> usar</span><span><kbd>Espacio</kbd> saltar</span><span><kbd>Shift</kbd> correr</span><span><kbd>C</kbd> hallazgos</span><span><kbd>R</kbd> desatascar</span><span><kbd>M</kbd> sonido</span></div>
 </div>
 <div id="toasts"></div>
 <div id="flash"></div>
@@ -417,8 +475,13 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
 <div id="pause" class="overlay">
   <div class="box">
     <h2>PAUSA</h2>
-    <p class="dim">Haz clic para continuar</p>
-    <button id="pauseMenu" class="btn">Volver al menú</button>
+    <p class="p-sub" id="pauseSub">El juego está detenido. Presiona el botón verde para seguir jugando.</p>
+    <button id="pauseGo" class="btn go">▶ Continuar</button>
+    <div class="p-row">
+      <button id="pauseBook" class="btn">📒 Mis hallazgos <small>(C)</small></button>
+      <button id="pauseStuck" class="btn">🧭 Me quedé atascado <small>(R)</small></button>
+    </div>
+    <button id="pauseMenu" class="p-menu">Salir al menú principal</button>
   </div>
 </div>
 
@@ -434,13 +497,14 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
 <div id="results" class="overlay">
   <div class="box">
     <div class="r-head">
-      <div><img class="logo-blanco r-logo" alt="INACAP"><div class="r-kicker"></div><div class="r-title"></div><div class="r-meta"></div></div>
+      <div><img class="logo-blanco r-logo" alt="INACAP"><div class="r-kicker"></div><div class="r-title"></div><div class="r-hello"></div><div class="r-meta"></div></div>
       <div class="r-total"></div>
     </div>
     <div><table class="r-break"></table><div class="r-learn" style="margin-top:16px"></div></div>
     <div class="r-rank"></div>
     <div class="r-actions">
       <button class="btn primary r-again">Jugar otra vez</button>
+      <button class="btn r-book">📒 Ver mis hallazgos</button>
       <button class="btn r-other">Probar el otro desafío</button>
       <button class="btn r-menu">Menú principal</button>
     </div>
@@ -457,6 +521,7 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
 <script src="js/nursing.js"></script>
 <script src="js/design.js"></script>
 <script src="js/inacap.js"></script>
+<script src="js/secrets.js"></script>
 <script src="js/menu.js"></script>
 </body>
 </html>

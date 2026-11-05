@@ -127,16 +127,16 @@
     { id: 'audifonos', icon: '🎧', name: 'Audífonos', why: 'Necesitas escuchar a tus pacientes y a tu equipo.' },
   ];
   const PATIENTS = [
-    { key: 'sano', name: 'Tomás R.', skin: '#e0ac8a', mon: 'FC 74 · SpO₂ 98%', col: '#3ddc84', vit: 'Temp 36,6 °C · FC 74 lpm · SpO₂ 98%', obs: 'Conversa con normalidad y no tiene síntomas. Vino a acompañar a un familiar.' },
-    { key: 'leve', name: 'Valentina P.', skin: '#d8b48c', mon: 'FC 92 · SpO₂ 96%', col: '#d9ff3a', vit: 'Temp 37,8 °C · FC 92 lpm · SpO₂ 96%', obs: 'Tos leve y dolor de cabeza. Camina sin ayuda.' },
-    { key: 'deso', name: 'Matías L.', skin: '#c3bf8e', tired: true, mon: 'FC 108 · SpO₂ 94%', col: '#ffb23f', vit: 'Temp 38,6 °C · FC 108 lpm · SpO₂ 94%', obs: 'No recuerda dónde está ni qué día es. Está inquieto.' },
-    { key: 'crit', name: 'Sofía T.', skin: '#a9c69a', tired: true, mon: 'FC 128 · SpO₂ 86%', col: '#ff4d4d', vit: 'Temp 39,4 °C · FC 128 lpm · SpO₂ 86%', obs: 'Respira con mucha dificultad, tiene los labios azulados y responde con esfuerzo.' },
+    { key: 'sano', name: 'Tomás R.', skin: '#e0ac8a', mon: 'FC 74 · SpO₂ 98%', col: '#3ddc84', vit: 'Temp 36,6 °C · FC 74 lpm · SpO₂ 98%', obs: 'Conversa con normalidad y no tiene síntomas. Vino a acompañar a un familiar.', say: 'Hola, {n}. Yo me siento bien, solo vine a acompañar a mi hermana.' },
+    { key: 'leve', name: 'Valentina P.', skin: '#d8b48c', mon: 'FC 92 · SpO₂ 96%', col: '#d9ff3a', vit: 'Temp 37,8 °C · FC 92 lpm · SpO₂ 96%', obs: 'Tos leve y dolor de cabeza. Camina sin ayuda.', say: '{n}, me duele un poco la cabeza y tengo tos… pero puedo esperar.' },
+    { key: 'deso', name: 'Matías L.', skin: '#c3bf8e', tired: true, mon: 'FC 108 · SpO₂ 94%', col: '#ffb23f', vit: 'Temp 38,6 °C · FC 108 lpm · SpO₂ 94%', obs: 'No recuerda dónde está ni qué día es. Está inquieto.', say: '¿{n}…? ¿Dónde estoy? ¿Qué día es hoy…?' },
+    { key: 'crit', name: 'Sofía T.', skin: '#a9c69a', tired: true, mon: 'FC 128 · SpO₂ 86%', col: '#ff4d4d', vit: 'Temp 39,4 °C · FC 128 lpm · SpO₂ 86%', obs: 'Respira con mucha dificultad, tiene los labios azulados y responde con esfuerzo.', say: '{n}… me… cuesta… mucho… respirar…' },
   ];
   const CHESTS = [
-    { room: 'Farmacia', ok: { id: 'suero', icon: '💧', name: 'Suero fisiológico' }, bad: [{ icon: '🍯', name: 'Jarabe para la tos', why: 'El jarabe alivia la tos, pero no es parte de la cura.' }, { icon: '🥤', name: 'Bebida energética', why: 'No es un insumo clínico.' }] },
-    { room: 'Sala de curaciones', ok: { id: 'jeringa', icon: '💉', name: 'Jeringa estéril' }, bad: [{ icon: '✂️', name: 'Tijeras', why: 'Sirven para cortar vendajes, no para administrar la cura.' }, { icon: '🩹', name: 'Parche curita', why: 'Es para heridas pequeñas: no sirve para administrar la cura.' }] },
-    { room: 'Laboratorio', ok: { id: 'antidoto', icon: '🧪', name: 'Antídoto base (rotulado)' }, bad: [{ icon: '⚗️', name: 'Frasco sin rótulo', why: 'Nunca se usa algo sin rotular: no sabes qué contiene.' }, { icon: '🧫', name: 'Placa de cultivo', why: 'Es una muestra de laboratorio, no un tratamiento.' }] },
-    { room: 'Estación de enfermería', ok: { id: 'ficha', icon: '📋', name: 'Ficha del paciente' }, bad: [{ icon: '📰', name: 'Revista', why: 'No aporta información clínica.' }, { icon: '🎮', name: 'Control de videojuego', why: '¡Buen intento! Pero no es un insumo clínico.' }] },
+    { room: 'Farmacia', need: '1 suero fisiológico', ok: { id: 'suero', icon: '💧', name: 'Suero fisiológico' }, bad: [{ icon: '💧', name: 'Suero fisiológico (vencido)', why: 'Antes de usar un insumo, siempre revisa la fecha de vencimiento.' }, { icon: '🍯', name: 'Jarabe para la tos', why: 'El jarabe alivia la tos, pero no es parte de la cura.' }, { icon: '🥤', name: 'Bebida energética', why: 'No es un insumo clínico.' }] },
+    { room: 'Sala de curaciones', need: '1 jeringa estéril', ok: { id: 'jeringa', icon: '💉', name: 'Jeringa estéril' }, bad: [{ icon: '💉', name: 'Jeringa con envase abierto', why: 'Si el envase está abierto ya no es estéril: se descarta.' }, { icon: '✂️', name: 'Tijeras', why: 'Sirven para cortar vendajes, no para administrar la cura.' }, { icon: '🩹', name: 'Parche curita', why: 'Es para heridas pequeñas: no sirve para administrar la cura.' }] },
+    { room: 'Laboratorio', need: '1 antídoto rotulado', ok: { id: 'antidoto', icon: '🧪', name: 'Antídoto base (rotulado)' }, bad: [{ icon: '🧪', name: 'Antídoto rotulado para otro paciente', why: 'El rótulo debe coincidir con TU paciente.' }, { icon: '⚗️', name: 'Frasco sin rótulo', why: 'Nunca se usa algo sin rotular: no sabes qué contiene.' }, { icon: '🧫', name: 'Placa de cultivo', why: 'Es una muestra de laboratorio, no un tratamiento.' }] },
+    { room: 'Estación de enfermería', need: 'la ficha de tu paciente', ok: { id: 'ficha', icon: '📋', name: 'Ficha del paciente' }, bad: [{ icon: '📋', name: 'Ficha de otro paciente', why: 'Siempre verifica nombre y RUT antes de usar una ficha.' }, { icon: '📰', name: 'Revista', why: 'No aporta información clínica.' }, { icon: '🎮', name: 'Control de videojuego', why: '¡Buen intento! Pero no es un insumo clínico.' }] },
   ];
   const STEPS = [
     { icon: '🧼', name: 'Higiene de manos', hint: 'Antes de tocar al paciente, siempre va la higiene de manos.' },
@@ -153,6 +153,7 @@
     title: 'Protocolo Z',
     endTitle: '¡Brote contenido!',
     endDelay: 3400,
+    greetKicker: 'Centro de Simulación · Enfermería',
     learn: ['Autocuidado: entrar protegido a un área clínica.', 'Observación y criterio para priorizar al paciente más grave.', 'Orden y preparación de los insumos de atención.', 'Seguridad del paciente: seguir el protocolo paso a paso.'],
     career: 'Así trabaja un equipo de Enfermería: se protege, observa, prioriza y sigue protocolos para cuidar a las personas.',
     build() {
@@ -249,7 +250,7 @@
               G.sfx.pick();
               G.addItem({ id: it.id, icon: it.icon, name: it.name });
               G.toast(`${it.icon} ${it.name} equipado · EPP ${eppCount}/3`, 'good');
-              G.setObjective(`Equípate para entrar al área de brote <b>(${eppCount}/3)</b>`, 'Toma solo lo que te protege. Lo demás se queda fuera.');
+              G.setObjective(G.t(`{n}, equípate para entrar al área de brote <b>(${eppCount}/3)</b>`), eppCount < 3 ? `Te ${3 - eppCount === 1 ? 'falta 1 elemento' : 'faltan ' + (3 - eppCount) + ' elementos'} de protección.` : '');
               if (eppCount === 3) {
                 G.openCells(doorA, CLR.red);
                 G.stageDone();
@@ -273,6 +274,13 @@
         pr.rotation.x = -1.25;
         pr.position.set(x, 1.95, -8.85);
         sc.add(pr);
+        G.interact(pr, {
+          label: `Hablar con ${p.name}`,
+          onUse() {
+            G.sfx.click();
+            G.toast(`🛏️ <b>${p.name}:</b> «${G.t(p.say)}»`, p.key === 'crit' ? 'bad' : 'info', 4200);
+          },
+        });
         if (p.key === 'crit') critIdx = i;
         if (p.key === 'deso' || p.key === 'crit') {
           const head = pr.userData.parts.head;
@@ -368,8 +376,8 @@
             const opts = G.shuffle([Object.assign({ ok: true }, c.ok), ...c.bad]);
             G.modal({
               title: `🧰 Cofre · ${c.room}`,
-              text: 'Elige el insumo que necesitas para preparar la cura.',
-              layout: 'cards',
+              text: G.t(`<b>{n}</b>, aquí tienes que escoger <b>${c.need}</b> para preparar la cura. ¡Ojo: no cualquiera sirve, lee bien!`),
+              layout: 'cards4',
               options: opts.map((o) => ({
                 icon: o.icon,
                 label: o.name,
@@ -383,8 +391,8 @@
                     ch.userData.lid.rotation.x = -0.9;
                     ch.userData.lid.position.set(0, 0.85, -0.25);
                     G.closeModal();
-                    G.toast(`${c.ok.icon} <b>${c.ok.name}</b> reunido · Insumos ${got}/4`, 'good');
-                    G.setObjective(`Reúne los insumos para la cura <b>(${got}/4)</b>`, 'Farmacia · Sala de curaciones · Laboratorio · Estación de enfermería');
+                    G.toast(G.t(`${c.ok.icon} ¡Bien, {n}! <b>${c.ok.name}</b> reunido · Insumos ${got}/4`), 'good');
+                    G.setObjective(G.t(`{n}, reúne los insumos para la cura <b>(${got}/4)</b>`), 'Necesitas: 💧 1 suero · 💉 1 jeringa estéril · 🧪 1 antídoto · 📋 la ficha del paciente');
                     if (got === 4) {
                       G.openCells(doorD, '#f2b632');
                       G.stageDone();
@@ -516,7 +524,7 @@
                 monState = { txt: 'RESPONDIENDO', col: '#ffb23f', sp: 110 };
                 G.burst(new V3(6.5, 2.4, -49.5), ['#7ff5d9', '#ffffff', '#3ddc84'], 30, 2.5);
               }
-              G.setObjective('Aplica el protocolo de contención en orden', renderSteps());
+              G.setObjective(G.t('{n}, aplica el protocolo de contención en orden'), renderSteps());
               if (stepNext === STEPS.length) contain();
             } else G.mistake(`Ese paso no va ahora. <b>Pista:</b> ${STEPS[stepNext].hint}`);
           },
@@ -552,6 +560,106 @@
         }
       });
 
+      /* =========== ZONAS PARA EXPLORAR =========== */
+      // Sala de Estudio y Descanso (al este del vestidor, puerta abierta)
+      w.room(12, 0, 22, 10, R);
+      w.carve(12, 1, 8, 12, 3, 9);
+      G.wallPlace(G.sign('SALA DE ESTUDIO ➜', { w: 2, h: 0.45, bg: CLR.teal }), 'E', 12, 9, 4.45);
+      w.fill(21, 1, 1, 21, 2, 4, 'n_shelf');
+      w.fill(18, 1, 1, 20, 2, 1, 'n_shelf');
+      // mesa de estudio con libros
+      const desk = new THREE.Group();
+      desk.position.set(15.5, 1, 4.5);
+      G.box(2.4, 0.1, 1.4, '#c8a77a', 0, 0.8, 0, desk);
+      [[-1.1, -0.6], [1.1, -0.6], [-1.1, 0.6], [1.1, 0.6]].forEach(([a, b]) => G.box(0.08, 0.8, 0.08, '#8a6a45', a, 0.4, b, desk));
+      [['#d9343e', -0.6], ['#17a58b', -0.35], ['#4d8fd6', 0.5]].forEach(([c, x]) => G.box(0.22, 0.06, 0.32, c, x, 0.88, 0.1, desk));
+      G.box(0.5, 0.02, 0.36, '#ffffff', 0.05, 0.86, -0.2, desk);
+      sc.add(desk);
+      G.collider(14.3, 1, 3.8, 16.7, 1.85, 5.2);
+      // sillón
+      const sofa = new THREE.Group();
+      sofa.position.set(18.5, 1, 8.9);
+      G.box(2.6, 0.45, 0.9, '#17a58b', 0, 0.25, 0, sofa);
+      G.box(2.6, 0.6, 0.25, '#128a74', 0, 0.75, 0.38, sofa);
+      G.box(0.25, 0.35, 0.9, '#128a74', -1.2, 0.6, 0, sofa);
+      G.box(0.25, 0.35, 0.9, '#128a74', 1.2, 0.6, 0, sofa);
+      sc.add(sofa);
+      G.collider(17.2, 1, 8.45, 19.8, 1.8, 9.98);
+      G.placeSecret('gato', 20.45, 1, 8.7, { model: G.voxCat(), label: 'Acariciar al gato', hy: 0.3, onUse: () => [880, 1100, 990].forEach((f, i) => G.sfx.tone(f, 0.09, 'sine', 0.04, 60, i * 0.11)) });
+      G.placeSecret('lampara', 21.5, 3.35, 1.7, { size: 0.42, label: 'Examinar la lámpara antigua' });
+      G.npc({
+        name: 'Profe Carla', role: 'Docente de Enfermería', avatar: '👩‍⚕️', x: 14.2, z: 7.6, rotY: -Math.PI / 2,
+        look: { skin: '#d8a27e', shirt: '#ffffff', pants: '#17a58b', hair: '#4a2a14', cross: '#d9343e' },
+        lines: [
+          '¡Hola, {n}! Qué bueno verte por acá. Soy la profe Carla y enseño Enfermería en INACAP. Te tengo una pregunta:',
+          'Tip, {n}: la saturación de oxígeno normal está entre 95% y 100%. Bajo 90% es una urgencia.',
+          '{n}, en Enfermería se aprende practicando: primero en simulación y después en campo clínico.',
+          'Dicen que hay una pared agrietada en la Estación de enfermería… yo no te dije nada 😉',
+        ],
+        quiz: {
+          q: '¿Cuánto debe durar un buen lavado de manos con agua y jabón?',
+          answer: 'La respuesta era <b>40 a 60 segundos</b>: así alcanzas a limpiar todas las zonas de la mano.',
+          opts: [
+            { t: '5 segundos', icon: '⚡' },
+            { t: '40 a 60 segundos', icon: '🧼', ok: true, why: 'Entre 40 y 60 segundos para limpiar palmas, dorsos, dedos y uñas.' },
+            { t: '5 minutos', icon: '⏳' },
+          ],
+        },
+      });
+      G.poster('afiche6', 'N', 0, 15, 2.95, 1.8);
+      G.poster('afiche10', 'E', 22, 7, 2.95, 1.8);
+      G.wallPlace(G.brandSign('Sala de Estudio · Enfermería', 4.2, 0.7), 'S', 10, 15.5, 4.3);
+
+      // Sala de Simulación Avanzada (secreta, tras la pared agrietada de la Estación)
+      w.room(16, -31, 24, -23, R);
+      G.secretWall('pasadizo', G.doorCells(16, 2, -27, 16, 4, -26), 15.9, 3.1, -26, Math.PI / 2, '#cfe3de');
+      G.wallPlace(G.sign('SALA DE SIMULACIÓN AVANZADA', { w: 4.2, h: 0.5, bg: CLR.dark, fg: '#7ff5d9' }), 'N', -31, 20, 4.45);
+      bed(20.5, -28, '#d9343e');
+      const man = G.person({ skin: '#e9dccb', shirt: '#9fb4c2', pants: '#9fb4c2', hair: '#e9dccb' });
+      man.rotation.x = -1.25;
+      man.position.set(20.5, 1.95, -26.95);
+      sc.add(man);
+      const manL = G.label('Maniquí de simulación', { scale: 2 });
+      manL.position.set(20.5, 3.0, -27.5);
+      sc.add(manL);
+      const monS = monitor('SIMULACIÓN', '#7ff5d9');
+      monS.position.set(20.5, 3.3, -29.95);
+      sc.add(monS);
+      let monSp = 0;
+      G.tick((dt) => {
+        if (!monS.parent) return false;
+        monSp += dt * 90;
+        monS.userData.draw('SIMULACIÓN', '#7ff5d9', monSp);
+      });
+      const desk2 = new THREE.Group();
+      desk2.position.set(18, 1, -24.6);
+      G.box(1.4, 0.1, 0.7, '#c8a77a', 0, 0.8, 0, desk2);
+      G.box(1.3, 0.8, 0.08, '#8a6a45', 0, 0.4, 0.3, desk2);
+      sc.add(desk2);
+      G.collider(17.3, 1, -24.95, 18.7, 1.85, -24.05);
+      G.placeSecret('diario', 18, 2.1, -24.6, { size: 0.36, label: 'Leer el diario' });
+      G.npc({
+        name: 'Enfermera Ana', role: 'Jefa de Simulación', avatar: '🧑‍⚕️', x: 22.4, z: -24.8, rotY: Math.PI,
+        look: { skin: '#c98d6b', shirt: '#17a58b', pants: '#17a58b', hair: '#1c1c1c', cross: '#ffffff' },
+        lines: [
+          '¡{n}! ¿Cómo encontraste esta sala? Aquí practicamos con maniquíes que respiran y tienen pulso. Una pregunta rápida:',
+          '{n}, en esta sala te puedes equivocar sin dañar a nadie. Por eso la simulación es tan importante.',
+          'Cuando entres a INACAP, {n}, vas a practicar acá antes de tu primera práctica clínica.',
+        ],
+        quiz: {
+          q: '¿Qué significa la sigla EPP?',
+          answer: 'EPP significa <b>Elementos de Protección Personal</b>: mascarilla, guantes, pechera…',
+          opts: [
+            { t: 'Elementos de Protección Personal', icon: '🧤', ok: true, why: 'Son la mascarilla, los guantes, la pechera y otros elementos que te protegen.' },
+            { t: 'Equipo de Primeros Pasos', icon: '👣' },
+            { t: 'Examen de Presión del Paciente', icon: '🩺' },
+          ],
+        },
+      });
+      G.poster('afiche7', 'E', 24, -27.5, 2.95, 1.8);
+      // Estetoscopio escondido bajo una cama del triage
+      G.placeSecret('estetoscopio', 12.5, 1.25, -10.4, { size: 0.36, label: 'Recoger el estetoscopio' });
+
       /* --- marca INACAP: afiches, carteles y fichas --- */
       G.poster('afiche5', 'W', 0, 5.5, 3.62, 1.4);
       G.poster('afiche1', 'E', 12, 5.5, 3.62, 1.4);
@@ -568,14 +676,14 @@
       return {
         spawn: { x: 6.5, y: 1, z: 8.5, yaw: 0 },
         intro: {
-          title: '🚨 Protocolo Z',
-          text: '<p>Un brote extraño afecta al <b>Centro de Simulación</b>. Algunos pacientes presentan síntomas.</p><p>Eres parte del equipo de apoyo de <b>Enfermería</b> y debes actuar rápido:</p><ol class="steps"><li>Protégete antes de entrar</li><li>Identifica a quién atender primero</li><li>Reúne los insumos para la cura</li><li>Aplica el protocolo final de contención</li></ol>',
+          title: '🚨 ¡Hola, {n}! Esto es el Protocolo Z',
+          text: '<p><b>{n}</b>, un brote extraño afecta al <b>Centro de Simulación</b>. Algunos pacientes presentan síntomas.</p><p>Eres parte del equipo de apoyo de <b>Enfermería</b> y debes actuar rápido:</p><ol class="steps"><li>Protégete antes de entrar</li><li>Identifica a quién atender primero</li><li>Reúne los insumos para la cura</li><li>Aplica el protocolo final de contención</li></ol>',
         },
         stages: [
-          { title: 'Protégete antes de entrar', short: 'EPP', points: 20, objective: 'Equípate para entrar al área de brote <b>(0/3)</b>', sub: 'Toma solo lo que te protege. Lo demás se queda fuera.', skip: () => { G.openCells(doorA); G.stageDone(20); } },
-          { title: 'Identifica a los infectados', short: 'Triage', points: 25, objective: 'Revisa las fichas y activa la palanca <b>PRIORIDAD</b> del paciente más grave', sub: 'Observa los monitores y las fichas a los pies de cada cama. Tienes 2 intentos.', skip: () => { triageDone = true; G.openCells(doorB); G.stageDone(25); } },
-          { title: 'Reúne los insumos para la cura', short: 'Insumos', points: 30, objective: 'Reúne los insumos para la cura <b>(0/4)</b>', sub: 'Farmacia · Sala de curaciones · Laboratorio · Estación de enfermería', skip: () => { G.openCells(doorD); G.stageDone(30); } },
-          { title: 'Protocolo final de contención', short: 'Protocolo', points: 25, objective: 'Aplica el protocolo de contención en orden', sub: renderSteps(), skip: () => { stepNext = 5; contain(); }, onEnter: () => G.setObjective('Aplica el protocolo de contención en orden', renderSteps()) },
+          { title: 'Protégete antes de entrar', short: 'EPP', points: 20, objective: '{n}, equípate para entrar al área de brote <b>(0/3)</b>', sub: 'Toma solo lo que te protege. Lo demás se queda fuera. Tip: explora también la Sala de Estudio →', skip: () => { G.openCells(doorA); G.stageDone(20); } },
+          { title: 'Identifica a los infectados', short: 'Triage', points: 25, objective: '{n}, revisa las fichas y activa la palanca <b>PRIORIDAD</b> del paciente más grave', sub: 'Habla con los pacientes, observa los monitores y lee las fichas. Tienes 2 intentos.', skip: () => { triageDone = true; G.openCells(doorB); G.stageDone(25); } },
+          { title: 'Reúne los insumos para la cura', short: 'Insumos', points: 30, objective: '{n}, reúne los insumos para la cura <b>(0/4)</b>', sub: 'Necesitas: 💧 1 suero · 💉 1 jeringa estéril · 🧪 1 antídoto · 📋 la ficha del paciente', skip: () => { G.openCells(doorD); G.stageDone(30); } },
+          { title: 'Protocolo final de contención', short: 'Protocolo', points: 25, objective: 'Aplica el protocolo de contención en orden', sub: renderSteps(), skip: () => { stepNext = 5; contain(); }, onEnter: () => G.setObjective(G.t('{n}, aplica el protocolo de contención en orden'), renderSteps()) },
         ],
       };
     },
