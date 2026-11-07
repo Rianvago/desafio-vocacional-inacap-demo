@@ -203,6 +203,9 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 @media (max-width:1180px){.hud-center{top:auto;bottom:168px}}
 .r-break tr.gold td{color:#ffd23f}
+.r-net{padding:.6em .8em;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid var(--line);font-size:.86rem;margin-bottom:12px;line-height:1.45}
+.r-online{margin-bottom:16px}
+.r-online small{font-size:.72rem}
 .r-hello{font:800 1.15rem var(--ui);color:#fff;margin-top:.45em}
 .npc-say{display:flex;gap:14px;align-items:flex-start}
 .npc-say .av{font-size:2.6rem;line-height:1;flex:none}
@@ -308,6 +311,33 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
 #login .err{color:var(--ired);font-weight:700;font-size:.85rem;min-height:1.2em;margin:10px 0}
 #login .acts{display:flex;gap:10px}
 #login .acts .ibtn{flex:1}
+/* ---------- datos del jugador (pantalla de inicio) ---------- */
+.menu-wrap{width:min(720px,100%)}
+.pform{background:rgba(12,16,26,.72);border:2px solid var(--line);border-left:6px solid var(--ired);border-radius:14px;padding:12px 14px 10px;margin:0 0 .9em}
+.pf-head{display:flex;align-items:baseline;gap:.4em 1em;flex-wrap:wrap;margin-bottom:8px}
+.pf-head b{font:800 .78rem var(--ui);letter-spacing:.14em;text-transform:uppercase;color:#fff}
+.pf-head span{color:var(--dim);font-size:.8rem}
+.pf-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:8px 12px}
+.pf-field{display:flex;flex-direction:column;gap:.3em;font:700 .78rem var(--ui);color:#cfd7e4;min-width:0}
+.pf-field em{font-style:normal;font-weight:500;color:var(--dim)}
+.pf-wide{grid-column:1/-1}
+.pf-field input{font:600 1rem var(--ui);padding:.55em .75em;border-radius:10px;border:2px solid var(--line);background:rgba(255,255,255,.07);color:#fff;outline:none;width:100%;min-width:0}
+.pf-field input::placeholder{color:rgba(255,255,255,.35)}
+.pf-field input:focus{border-color:#fff;background:rgba(255,255,255,.11)}
+.pf-field input.ok{border-color:rgba(61,220,132,.7)}
+.pf-field input.need,.pf-chk.need{border-color:#ff4d4d;animation:shake .35s}
+.pf-field input:disabled{opacity:.7}
+.pf-chk{display:flex;gap:.6em;align-items:flex-start;margin-top:10px;font-size:.8rem;line-height:1.4;color:#cfd7e4;cursor:pointer;border:2px solid transparent;border-radius:8px;padding:2px}
+.pf-chk input{accent-color:var(--ired);width:17px;height:17px;margin:0;flex:none}
+.pform.locked .pf-grid,.pform.locked .pf-chk{display:none}
+@media (max-width:520px){.pf-grid{grid-template-columns:1fr}}
+@media (max-height:860px) and (min-width:721px){
+  #menu h1{font-size:clamp(1.4rem,3.2vw,2.1rem);margin:.35em 0 .25em}
+  #menu .lead{font-size:.95rem;margin-bottom:.8em}
+  .card{padding:14px;gap:.35em}
+  .c-desc{font-size:.86rem}
+  .howto{margin:1em 0 .6em}
+}
 @media (max-width:900px){.w-main{grid-template-columns:1fr}.w-hero{min-height:300px}}
 @media (max-width:520px){.w-actions{grid-template-columns:1fr}.w-qr{flex-direction:column;align-items:flex-start}}
 </style>
@@ -343,8 +373,8 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
         <button class="ibtn line" id="btnHaveCode">Ya tengo mi código</button>
       </div>
       <button class="w-guest" id="btnGuest">Entrar sin inscripción (modo presentación)</button>
-      <p class="w-count">Inscritos en este computador: <b id="regCount">0</b></p>
-      <p class="w-foot">Simulación de demo: los datos se guardan solo en este computador y no se envían a ningún servidor. En el evento real el QR llevará al formulario oficial de inscripción.</p>
+      <p class="w-count"><span id="regLabel">Inscritos en este computador</span>: <b id="regCount">0</b></p>
+      <p class="w-foot" id="wFoot">Simulación de demo: los datos se guardan solo en este computador y no se envían a ningún servidor. En el evento real el QR llevará al formulario oficial de inscripción.</p>
     </div>
   </div>
 </div>
@@ -414,9 +444,27 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
     <div class="m-brand"><img class="logo-blanco" alt="INACAP"><span>Sede Valparaíso · Demo jugable</span></div>
     <h1>DESAFÍO<br>VOCACIONAL</h1>
     <p class="lead">Explora dos áreas de estudio jugando en un mundo de cubos. Cada misión dura de 10 a 15 minutos y vale <b>100 puntos + bonus</b>.</p>
-    <label class="name">Tu nombre (así te hablará el juego)
-      <input id="playerName" maxlength="18" placeholder="Ej: Cata" autocomplete="off">
-    </label>
+    <form id="playerForm" class="pform" autocomplete="off" novalidate onsubmit="return false">
+      <div class="pf-head"><b>Tus datos</b><span>Completa todo para jugar · tu puntaje y tiempo quedan registrados</span></div>
+      <div class="pf-grid">
+        <label class="pf-field">Nombre y apellido
+          <input id="playerName" name="nombre" maxlength="40" placeholder="Ej: Catalina Rojas">
+        </label>
+        <label class="pf-field">RUT
+          <input id="pfRut" name="rut" maxlength="12" placeholder="12.345.678-9">
+        </label>
+        <label class="pf-field">Celular (WhatsApp)
+          <input id="pfTel" name="telefono" type="tel" maxlength="16" inputmode="tel" placeholder="+56 9 1234 5678">
+        </label>
+        <label class="pf-field">Email
+          <input id="pfMail" name="correo" type="email" maxlength="60" inputmode="email" placeholder="nombre@correo.cl">
+        </label>
+        <label class="pf-field pf-wide">Colegio
+          <input id="pfColegio" name="colegio" maxlength="60" placeholder="Ej: Liceo Eduardo de la Barra">
+        </label>
+      </div>
+      <label class="pf-chk"><input type="checkbox" id="pfOk"> <span>Acepto que INACAP registre mis datos y mi puntaje para el Desafío Vocacional y la entrega de premios.</span></label>
+    </form>
     <div id="who"></div>
     <div class="cards">
       <button class="card nurse" data-ch="enfermeria">
@@ -443,7 +491,7 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
       <span><kbd>C</kbd> hallazgos</span>
       <span><kbd>Esc</kbd> pausa</span>
     </div>
-    <p class="foot">Demo de concepto · sin conexión a base de datos · el ranking se guarda solo en este computador.<br>Presentador: <b>Shift + N</b> salta la etapa actual (esa partida no entra al ranking).</p>
+    <p class="foot" id="menuFoot">Tus datos y tu puntaje se guardan en este computador para el ranking y la entrega de premios.<br>Presentador: <b>Shift + N</b> salta la etapa actual (esa partida no entra al ranking).</p>
   </div>
 </div>
 
@@ -518,6 +566,7 @@ kbd{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:
 <script src="js/assets.js"></script>
 <script src="js/qrcode.min.js"></script>
 <script src="js/engine.js"></script>
+<script src="js/api.js"></script>
 <script src="js/nursing.js"></script>
 <script src="js/design.js"></script>
 <script src="js/inacap.js"></script>

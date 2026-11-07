@@ -1302,7 +1302,8 @@
     let rank = loadRank(r.id);
     let entry = null;
     if (!r.presenter) {
-      entry = { name: r.name, code: r.code, total: res.total, time: Math.round(res.time), at: Date.now() };
+      entry = { name: r.name, code: r.code, colegio: (G.jugador && G.jugador.colegio) || '', total: res.total, time: Math.round(res.time), at: Date.now() };
+      if (G.recordPlay) G.recordPlay(r); // guarda datos del jugador + puntaje + tiempo
       rank.push(entry);
       rank.sort((a, b) => b.total - a.total || a.time - b.time);
       rank = rank.slice(0, 50);
@@ -1332,7 +1333,7 @@
       `<h4>Ranking · este computador</h4><ol>` +
       rank
         .slice(0, 6)
-        .map((e) => `<li class="${e === entry ? 'me' : ''}"><span>${escapeHtml(e.name)}</span><b>${e.total}</b><i>${fmtTime(e.time)}</i></li>`)
+        .map((e) => `<li class="${e === entry ? 'me' : ''}"><span>${escapeHtml(e.name)}${e.colegio ? ` <small class="dim">${escapeHtml(e.colegio)}</small>` : ''}</span><b>${e.total}</b><i>${fmtTime(e.time)}</i></li>`)
         .join('') +
       `</ol>${rank.length ? '' : '<p class="dim">Aún no hay registros.</p>'}`;
     const other = r.id === 'enfermeria' ? 'diseno' : 'enfermeria';
@@ -1342,6 +1343,7 @@
     el.querySelector('.r-again').onclick = () => G.startChallenge(r.id, r.name);
     el.querySelector('.r-menu').onclick = () => G.toMenu();
     el.querySelector('.r-book').onclick = () => G.openHallazgos && G.openHallazgos();
+    if (G.afterResults) G.afterResults(r, el); // envía el puntaje a la planilla (si está conectada)
     if (G.saveAlbum) G.saveAlbum(r);
     el.classList.add('show');
     G.confettiDom();

@@ -7,8 +7,20 @@ window.CONFIG = {
   sede: 'Sede Valparaíso',
   evento: '21 de noviembre de 2026',
 
-  // Lo que contiene el código QR de la pantalla de bienvenida.
-  // Para el evento real, reemplázalo por la URL del formulario de inscripción.
+  // Modo kiosco: el juego parte directo en la pantalla donde cada estudiante escribe
+  // sus datos (nombre y apellido, RUT, celular, email y colegio) y juega.
+  // Ponlo en false para volver a la bienvenida con QR + código y PIN.
+  modoKiosco: true,
+
+  // ===== BASE DE DATOS (Google Sheets) =====
+  // Pega aquí la URL de la "Aplicación web" de Apps Script (termina en /exec).
+  // Si queda vacío, el demo funciona sin conexión: todo se guarda solo en este computador.
+  apiUrl: '',
+
+  // Página de inscripción que abre el código QR cuando la base de datos está conectada.
+  urlInscripcion: 'https://rianvago.github.io/desafio-vocacional-inacap-demo/inscripcion.html',
+
+  // Texto del QR mientras NO hay base de datos conectada (modo demo).
   qrTexto: 'DEMO - Inscripcion Desafio Vocacional INACAP Sede Valparaiso',
 
   // Frases de las "Fichas INACAP" que se recolectan dentro del juego (3 por desafío).

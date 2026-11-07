@@ -189,7 +189,7 @@
     if (!cv || typeof qrcode === 'undefined') return;
     if (qrcode.stringToBytesFuncs && qrcode.stringToBytesFuncs['UTF-8']) qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
     const qr = qrcode(0, 'H');
-    qr.addData(C.qrTexto || 'DEMO');
+    qr.addData(G.api && G.api.on() ? C.urlInscripcion : C.qrTexto || 'DEMO');
     qr.make();
     const n = qr.getModuleCount();
     const size = cv.width;
@@ -212,6 +212,11 @@
     $('menu').classList.remove('show');
     $('welcome').classList.add('show');
     $('regCount').textContent = loadRegs().length;
+    if (G.api && G.api.on())
+      G.api
+        .estado()
+        .then((r) => r && r.ok && ($('regCount').textContent = r.inscritos))
+        .catch(() => {});
   };
   function enterMenu(p) {
     G.participant = p;
@@ -223,6 +228,7 @@
     const who = $('who'),
       name = $('playerName');
     document.querySelectorAll('.card').forEach((c) => c.classList.remove('pick'));
+    $('playerForm').classList.toggle('locked', !!p); // con código de inscripción no se piden los datos otra vez
     if (p) {
       who.innerHTML = `<span class="who-tag">Participante</span><b>${G.escapeHtml(p.nombre)} ${G.escapeHtml(p.apellido.charAt(0))}.</b><code>${p.codigo}</code><button class="linkbtn" id="whoOut">Cambiar</button>`;
       who.classList.add('show');
@@ -251,6 +257,11 @@
     document.querySelectorAll('.logo-color').forEach((i) => (i.src = A.logoColor));
     $('wDate').textContent = `${C.evento} · ${C.sede}`;
     drawQR();
+    if (G.api && G.api.on()) {
+      $('regLabel').textContent = 'Inscritos en total';
+      $('wFoot').textContent = 'Tus datos se guardan en la planilla oficial del evento y solo los usa INACAP para el Desafío Vocacional.';
+      $('btnScan').textContent = '📱 Inscribirme en este computador';
+    }
     $('btnScan').onclick = () => {
       G.sfx.init();
       G.sfx.click();
@@ -278,6 +289,25 @@
       if (!(edad >= 10 && edad <= 99)) return (err.textContent = 'Escribe tu edad (solo números).');
       if (!v('establecimiento') || !v('curso')) return (err.textContent = 'Completa tu establecimiento y curso.');
       if (!f.get('consentimiento')) return (err.textContent = 'Debes aceptar el consentimiento para participar.');
+      if (G.api && G.api.on()) {
+        const btn = e.target.querySelector('button[type=submit]');
+        btn.disabled = true;
+        btn.textContent = 'Enviando…';
+        err.textContent = '';
+        G.api
+          .inscribir({ nombre: v('nombre'), apellido: v('apellido'), edad: v('edad'), rut: v('rut'), telefono: v('telefono'), correo: v('correo'), tipo: v('tipo'), establecimiento: v('establecimiento'), curso: v('curso'), desafio: v('desafio'), consentimiento: true, admision: !!f.get('admision') })
+          .then((r) => {
+            if (!r || !r.ok) return (err.textContent = (r && r.error) || 'No se pudo inscribir. Intenta de nuevo.');
+            showDone(r.nombre, r.codigo, r.pin, v('correo'));
+            G.api.estado().then((x) => x && x.ok && ($('regCount').textContent = x.inscritos)).catch(() => {});
+          })
+          .catch(() => (err.textContent = 'Sin conexión con la planilla. Revisa internet e intenta de nuevo.'))
+          .finally(() => {
+            btn.disabled = false;
+            btn.textContent = 'Inscribirme';
+          });
+        return;
+      }
       const regs = loadRegs();
       const codigo = newCode(regs);
       const pin = String(Math.floor(100000 + Math.random() * 900000));
@@ -299,26 +329,55 @@
         fecha: new Date().toISOString(),
       });
       saveRegs(regs);
+      $('regCount').textContent = regs.length;
+      showDone(cap(v('nombre')), codigo, pin, v('correo'));
+    };
+    function showDone(nombre, codigo, pin, correo) {
       G.sfx.good();
-      $('pdName').textContent = cap(v('nombre'));
+      $('pdName').textContent = nombre;
       $('pdCode').textContent = codigo;
       $('pdPin').textContent = pin;
-      $('pdMail').textContent = v('correo');
+      $('pdMail').textContent = correo;
       $('phoneForm').style.display = 'none';
       $('phoneDone').style.display = '';
       $('phoneScroll').scrollTop = 0;
-      $('regCount').textContent = regs.length;
       $('pdGo').onclick = () => {
         $('phone').classList.remove('show');
         openLogin(codigo);
       };
-    };
+    }
     $('loginForm').onsubmit = (e) => {
       e.preventDefault();
       const code = $('lgCode').value.trim().toUpperCase();
       const pin = $('lgPin').value.trim();
-      const r = loadRegs().find((x) => x.codigo === code);
-      if (!r || r.pinHash !== hashPin(code, pin)) {
+      const local = () => {
+        const x = loadRegs().find((q) => q.codigo === code);
+        return x && x.pinHash === hashPin(code, pin) ? x : null;
+      };
+      if (G.api && G.api.on()) {
+        const btn = e.target.querySelector('button[type=submit]');
+        btn.disabled = true;
+        $('lgErr').textContent = '';
+        G.api
+          .ingresar(code, pin)
+          .then((res) => {
+            if (res && res.ok) {
+              G.sfx.good();
+              return enterMenu(res.participante);
+            }
+            G.sfx.bad();
+            $('lgErr').textContent = (res && res.error) || 'No se pudo validar el código.';
+          })
+          .catch(() => {
+            const x = local();
+            if (x) return enterMenu(x);
+            $('lgErr').textContent = 'Sin conexión con la planilla. Revisa internet o entra sin inscripción.';
+          })
+          .finally(() => (btn.disabled = false));
+        return;
+      }
+      const r = local();
+      if (!r) {
         G.sfx.bad();
         $('lgErr').textContent = 'Código o PIN incorrecto. Revisa el mensaje que recibiste.';
         return;

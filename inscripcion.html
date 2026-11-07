@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inscripción · Desafío Vocacional INACAP</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%23CC0000%22/%3E%3Crect x=%224%22 y=%224%22 width=%223%22 height=%228%22 fill=%22%23fff%22/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--red:#CC0000;--gray:#3D3D3D;--light:#F2F2F2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--light);color:var(--gray);font-family:Rubik,'Segoe UI',system-ui,sans-serif}
+header{background:var(--red);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+header img{height:26px;display:block}
+header span{color:#fff;font:700 .7rem Rubik,sans-serif;letter-spacing:.12em;text-transform:uppercase;text-align:right}
+main{max-width:480px;margin:0 auto;padding:18px 16px 40px}
+h1{font:900 1.5rem/1.15 Rubik,sans-serif;margin:4px 0 6px}
+.hint{color:#6b6b6b;font-size:.92rem;line-height:1.45;margin:0 0 14px}
+.card{background:#fff;border-radius:16px;border-top:6px solid var(--red);padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.07)}
+label{display:block;font:700 .78rem Rubik,sans-serif;color:#555;margin:12px 0 5px}
+input,select{width:100%;font:500 1rem Rubik,sans-serif;padding:.75em .8em;border-radius:10px;border:2px solid #ddd;background:#fafafa;color:var(--gray);outline:none}
+input:focus,select:focus{border-color:var(--red)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg label{margin:0;display:flex;align-items:center;gap:8px;border:2px solid #ddd;border-radius:10px;padding:.75em;font-size:.9rem;cursor:pointer}
+.seg input{width:auto;accent-color:var(--red)}
+.chk{display:flex;gap:10px;align-items:flex-start;font:500 .85rem/1.4 Rubik,sans-serif;color:#555;margin-top:14px}
+.chk input{width:auto;margin-top:3px;accent-color:var(--red)}
+.err{color:var(--red);font-weight:700;font-size:.9rem;min-height:1.3em;margin:12px 0 8px}
+button{all:unset;box-sizing:border-box;display:block;width:100%;text-align:center;cursor:pointer;background:var(--red);color:#fff;font:800 1.05rem Rubik,sans-serif;padding:.95em;border-radius:12px}
+button:disabled{opacity:.6}
+.ok{width:70px;height:70px;border-radius:50%;background:#e8f8ef;color:#1a9a5a;display:grid;place-items:center;font-size:2.2rem;margin:6px auto 10px}
+.cred{background:var(--light);border-radius:14px;padding:16px;margin:16px 0;text-align:center}
+.cred small{display:block;font:700 .7rem Rubik,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#888}
+.cred b{display:block;font:800 2rem ui-monospace,Consolas,monospace;letter-spacing:.1em;margin:2px 0 10px}
+.tip{background:#fff4d6;border-radius:12px;padding:12px 14px;font-size:.9rem;line-height:1.45}
+.off{background:#fff;border-radius:16px;padding:22px;text-align:center;line-height:1.5}
+</style>
+</head>
+<body>
+<header><img src="img/inacap_blanco.png" alt="INACAP"><span>Desafío Vocacional<br><span id="sede"></span></span></header>
+<main>
+  <div id="form">
+    <h1>Inscríbete y juega</h1>
+    <p class="hint">Completa tus datos y recibirás tu <b>código de jugador</b> para ingresar en los computadores del evento.</p>
+    <form class="card" id="f" autocomplete="on" novalidate>
+      <div class="row">
+        <div><label>Nombre</label><input name="nombre" maxlength="30" autocomplete="given-name"></div>
+        <div><label>Apellido</label><input name="apellido" maxlength="30" autocomplete="family-name"></div>
+      </div>
+      <div class="row">
+        <div><label>Edad</label><input name="edad" type="tel" inputmode="numeric" maxlength="2" placeholder="Ej: 17"></div>
+        <div><label>RUT (opcional)</label><input name="rut" maxlength="12" placeholder="12.345.678-9"></div>
+      </div>
+      <label>Celular</label><input name="telefono" type="tel" maxlength="15" placeholder="+56 9 1234 5678" autocomplete="tel">
+      <label>Correo electrónico</label><input name="correo" type="email" maxlength="80" placeholder="nombre@correo.cl" autocomplete="email">
+      <label>Tipo de establecimiento</label>
+      <select name="tipo"><option>Colegio</option><option>Universidad</option><option>Instituto / CFT</option><option>Otro</option></select>
+      <label>Nombre del establecimiento</label><input name="establecimiento" maxlength="60">
+      <label>Curso o nivel</label><input name="curso" maxlength="30" placeholder="Ej: 4° medio">
+      <label>Desafío que quieres jugar</label>
+      <div class="seg">
+        <label><input type="radio" name="desafio" value="enfermeria" checked> Enfermería</label>
+        <label><input type="radio" name="desafio" value="diseno"> Diseño</label>
+      </div>
+      <label class="chk"><input type="checkbox" name="consentimiento"> <span>Acepto participar y que INACAP registre mis datos y resultados para el Desafío Vocacional. (Obligatorio)</span></label>
+      <label class="chk"><input type="checkbox" name="admision"> <span>Quiero recibir información de Admisión INACAP. (Opcional)</span></label>
+      <div class="err" id="err"></div>
+      <button type="submit" id="go">Inscribirme</button>
+    </form>
+  </div>
+
+  <div id="done" style="display:none">
+    <div class="card" style="text-align:center">
+      <div class="ok">✓</div>
+      <h1>¡Listo, <span id="dn"></span>!</h1>
+      <p class="hint">Estas son tus credenciales para jugar:</p>
+      <div class="cred"><small>Tu código</small><b id="dc"></b><small>Tu PIN</small><b id="dp"></b></div>
+      <div class="tip">📸 <b>Toma una captura de pantalla</b> ahora. Ingresa este código y PIN en el computador de juego. Tu PIN es personal: no lo compartas.</div>
+    </div>
+  </div>
+
+  <div id="off" class="off" style="display:none">
+    <h1>Inscripción aún no disponible</h1>
+    <p class="hint">La base de datos del evento todavía no está conectada. Vuelve a escanear el código más tarde.</p>
+  </div>
+</main>
+<script src="js/config.js"></script>
+<script>
+(function () {
+  const C = window.CONFIG || {};
+  const $ = (id) => document.getElementById(id);
+  $('sede').textContent = C.sede || '';
+  const url = String(C.apiUrl || '').trim();
+  if (!url) {
+    $('form').style.display = 'none';
+    $('off').style.display = '';
+    return;
+  }
+  $('f').onsubmit = async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const v = (k) => String(f.get(k) || '').trim();
+    const err = $('err');
+    err.textContent = '';
+    if (!v('nombre') || !v('apellido')) return (err.textContent = 'Completa tu nombre y apellido.');
+    const edad = parseInt(v('edad'), 10);
+    if (!(edad >= 10 && edad <= 99)) return (err.textContent = 'Escribe tu edad (solo números).');
+    if (!/^\+?[\d\s]{8,15}$/.test(v('telefono'))) return (err.textContent = 'Revisa tu número de celular.');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('correo'))) return (err.textContent = 'Revisa tu correo electrónico.');
+    if (!v('establecimiento') || !v('curso')) return (err.textContent = 'Completa tu establecimiento y curso.');
+    if (!f.get('consentimiento')) return (err.textContent = 'Debes aceptar el consentimiento para participar.');
+    const btn = $('go');
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+    try {
+      const datos = { nombre: v('nombre'), apellido: v('apellido'), edad: v('edad'), rut: v('rut'), telefono: v('telefono'), correo: v('correo'), tipo: v('tipo'), establecimiento: v('establecimiento'), curso: v('curso'), desafio: v('desafio'), consentimiento: true, admision: !!f.get('admision') };
+      const r = await (await fetch(url, { method: 'POST', body: JSON.stringify({ accion: 'inscribir', datos }) })).json();
+      if (!r.ok) throw new Error(r.error || 'No se pudo inscribir.');
+      $('dn').textContent = r.nombre;
+      $('dc').textContent = r.codigo;
+      $('dp').textContent = r.pin;
+      $('form').style.display = 'none';
+      $('done').style.display = '';
+      window.scrollTo(0, 0);
+    } catch (x) {
+      err.textContent = x.message && !/fetch|network/i.test(x.message) ? x.message : 'Sin conexión. Revisa tu internet e intenta de nuevo.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Inscribirme';
+    }
+  };
+})();
+</script>
+</body>
+</html>
